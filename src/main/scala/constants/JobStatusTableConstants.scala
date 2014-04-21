@@ -49,8 +49,9 @@ object JobStatusTableConstants {
   val LAST_STATUS_CHANGE: String = "LastStatusChange"
   val LAST_STATUS_CHANGE_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 
-  val PENDING_STATUS: String = "PENDING"
-  val RUNNING_STATUS: String = "RUNNING"
-  val ERROR_STATUS: String = "ERROR"
-  val SUCCESS_STATUS: String = "SUCCESS"
+  object JobStatus extends Enumeration {
+    type JobStatus = Value
+
+    val Pending, Running, Error, Success = Value
+  }
 }
