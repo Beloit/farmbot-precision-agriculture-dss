@@ -6,5 +6,5 @@ scalaVersion := "2.10.4"
 
 libraryDependencies += "com.github.seratch" % "awscala_2.10" % "[0.2,)"
 
-//export AWS_ACCESS_KEY_ID=AKIAIS7RVEZWGBDYSIQA
-//export AWS_SECRET_ACCESS_KEY=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
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test"
+
