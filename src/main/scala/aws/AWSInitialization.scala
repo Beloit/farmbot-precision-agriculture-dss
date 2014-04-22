@@ -53,7 +53,10 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix {
     if (table.isEmpty) {
       dynamo.createTable(
         name = tableName,
-        hashPK = const.CHANNEL_AND_VERSION -> const.CHANNEL_AND_VERSION_TYPE
+        hashPK = const.CHANNEL_AND_VERSION -> const.CHANNEL_AND_VERSION_TYPE,
+        rangePK = const.FARM_ID -> const.FARM_ID_TYPE,
+        otherAttributes = Seq(),
+        indexes = Seq()
       )
     }
   }

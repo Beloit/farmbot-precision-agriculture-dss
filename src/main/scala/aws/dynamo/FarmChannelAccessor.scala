@@ -1,42 +1,31 @@
 package dynamo
 
-import types.JobInfo
 import awscala._, dynamodbv2._
-import org.joda.time.format.ISODateTimeFormat
-import constants.JobStatusTableConstants
+import constants.FarmChannelConstants
+import aws.UsesPrefix
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ComparisonOperator, Condition}
+import scala.collection.mutable
 
-/**
- * Created with IntelliJ IDEA.
- * User: cameron
- * Date: 4/14/14
- * Time: 5:09 PM
- * Accessor for the JobStatus table
- */
-class FarmChannelAccessor(val prefix: String) extends DynamoAccessor {
-  implicit val const = JobStatusTableConstants
+class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
+  implicit val const = FarmChannelConstants
 
-  var table: Table = dynamo.table(prefix + const.TABLE_NAME) get
+  val table: Table = dynamo.table(prefix + const.TABLE_NAME).get
 
-  def addEntry(info: JobInfo) {
-    val timestamp = DateTime.now().toString(ISODateTimeFormat.dateTime())
+  def addEntry(channel: String, version: Int, farmId: String) {
+    val channelAndVersion = channel + "_" + version
 
-    println(table.hashCode())
-   /*
-    table.putItem(info.jobId,
-      const.FARM_ID -> info.farmId,
-      const.CHANNEL -> info.channel,
-      const.CHANNEL_VERSION -> info.channelVersion,
-      const.MODULE -> info.module,
-      const.MODULE_VERSION -> info.moduleVersion,
-      const.STATUS -> const.PENDING_STATUS,
-      const.ADDED_AT -> timestamp,
-      const.LAST_STATUS_CHANGE -> timestamp
-    )  */
+    table.putItem(channelAndVersion,
+      const.FARM_ID -> farmId)
   }
 
-  def updateStatus(id: Int, status: String) {
-    /*
-    Up next
-     */
+  def getFarmIdsForChannelVersion(channel: String, version: Int): Seq[String] = {
+    val channelAndVersion = channel + "_" + version
+
+    val cond = new Condition().withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(channelAndVersion))
+
+    val items = dynamo.query(table, Seq(const.CHANNEL_AND_VERSION -> cond))
+
+    return items.collect({case i: Item => i.attributes.find(_.name.contentEquals(const.FARM_ID)).get.value.s.get})
   }
+
 }

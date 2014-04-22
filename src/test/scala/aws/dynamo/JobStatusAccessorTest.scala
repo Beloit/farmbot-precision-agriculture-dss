@@ -13,7 +13,7 @@ class JobStatusAccessorTest extends FlatSpec with RequiresAWS with UsesPrefix {
   implicit val dynamo = DynamoDB.at(Region.Oregon)
   implicit val const = JobStatusTableConstants
 
-  var table: Table = dynamo.table(build(const.TABLE_NAME)).get
+  val table: Table = dynamo.table(build(const.TABLE_NAME)).get
 
   def withJob(testCode: String => Any) {
     val ji = new JobInfo {
