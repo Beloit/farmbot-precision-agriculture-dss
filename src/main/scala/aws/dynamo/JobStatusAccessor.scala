@@ -6,6 +6,7 @@ import org.joda.time.format.ISODateTimeFormat
 import constants.JobStatusTableConstants
 import constants.JobStatusTableConstants.JobStatus
 import constants.JobStatusTableConstants.JobStatus.JobStatus
+import aws.UsesPrefix
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,13 +15,14 @@ import constants.JobStatusTableConstants.JobStatus.JobStatus
  * Time: 5:09 PM
  * Accessor for the JobStatus table
  */
-class JobStatusAccessor(val prefix: String) extends DynamoAccessor {
+class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
   implicit val const = JobStatusTableConstants
 
-  var table: Table = dynamo.table(prefix + const.TABLE_NAME) get
+  var table: Table = dynamo.table(build(const.TABLE_NAME)).get
 
-  def addEntry(info: JobInfo) {
-    val timestamp = DateTime.now().toString(ISODateTimeFormat.dateTime())
+  def addEntry(info: JobInfo): String = {
+    info.addedAt = DateTime.now
+    info.lastStatusChange = info.addedAt
 
     table.putItem(info.jobId,
       const.FARM_ID -> info.farmId,
@@ -29,12 +31,14 @@ class JobStatusAccessor(val prefix: String) extends DynamoAccessor {
       const.MODULE -> info.module,
       const.MODULE_VERSION -> info.moduleVersion,
       const.STATUS -> JobStatus.Pending.toString,
-      const.ADDED_AT -> timestamp,
-      const.LAST_STATUS_CHANGE -> timestamp
+      const.ADDED_AT -> info.addedAt.toString(ISODateTimeFormat.dateTime()),
+      const.LAST_STATUS_CHANGE -> info.lastStatusChange.toString(ISODateTimeFormat.dateTime())
     )
+
+    return info.jobId
   }
 
-  def updateStatus(jobId: Int, status: JobStatus) {
+  def updateStatus(jobId: String, status: JobStatus) {
     val timestamp = DateTime.now().toString(ISODateTimeFormat.dateTime())
 
     table.putAttributes(jobId,

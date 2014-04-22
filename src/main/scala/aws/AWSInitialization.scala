@@ -1,22 +1,25 @@
+package aws
+
 /**
  * User: cameron
  * Date: 4/14/14
  * Time: 3:26 PM
  * Creates all buckets and tables used by the DSS
  */
+
+import _root_.dynamo.DynamoAccessor
 import awscala._, s3._, dynamodbv2._
 import constants.{FarmChannelConstants, JobStatusTableConstants}
-import dynamo.DynamoAccessor
 
-object AWSInitialization extends DynamoAccessor {
+object AWSInitialization extends DynamoAccessor with UsesPrefix {
   implicit val s3 = S3()
 
-  def setup(prefix: String) = {
-    ensureBucketExists(prefix + "farmbot-dss-rundata")
-    ensureBucketExists(prefix + "farmbot-dss-chanels")
+  def setup = {
+    ensureBucketExists(build("farmbot-dss-rundata"))
+    ensureBucketExists(build("farmbot-dss-chanels"))
 
-    ensureJobStatusTableExists(prefix)
-    ensureChannelFarmTableExists(prefix)
+    ensureJobStatusTableExists
+    ensureChannelFarmTableExists
   }
 
   private def ensureBucketExists(name: String) = {
@@ -27,10 +30,10 @@ object AWSInitialization extends DynamoAccessor {
     }
   }
 
-  private def ensureJobStatusTableExists(prefix: String) = {
+  private def ensureJobStatusTableExists = {
     implicit val const = JobStatusTableConstants
 
-    val tableName: String = prefix + const.TABLE_NAME
+    val tableName: String = build(const.TABLE_NAME)
     val table: Option[Table] = dynamo.table(tableName)
 
     if (table.isEmpty) {
@@ -41,10 +44,10 @@ object AWSInitialization extends DynamoAccessor {
     }
   }
 
-  private def ensureChannelFarmTableExists(prefix: String) = {
+  private def ensureChannelFarmTableExists = {
     implicit val const = FarmChannelConstants
 
-    val tableName: String = prefix + const.TABLE_NAME
+    val tableName: String = build(const.TABLE_NAME)
     val table: Option[Table] = dynamo.table(tableName)
 
     if (table.isEmpty) {

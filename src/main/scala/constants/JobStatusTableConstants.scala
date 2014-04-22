@@ -20,7 +20,7 @@ object JobStatusTableConstants {
   val HASH_KEY: String = JOB_ID
 
   val JOB_ID: String = "JobId"
-  val JOB_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
+  val JOB_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 
   val ADDED_AT: String = "AddedAt"
   val ADDED_AT_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String

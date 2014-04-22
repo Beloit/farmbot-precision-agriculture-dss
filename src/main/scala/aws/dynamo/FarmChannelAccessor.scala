@@ -21,7 +21,7 @@ class FarmChannelAccessor(val prefix: String) extends DynamoAccessor {
     val timestamp = DateTime.now().toString(ISODateTimeFormat.dateTime())
 
     println(table.hashCode())
-
+   /*
     table.putItem(info.jobId,
       const.FARM_ID -> info.farmId,
       const.CHANNEL -> info.channel,
@@ -31,7 +31,7 @@ class FarmChannelAccessor(val prefix: String) extends DynamoAccessor {
       const.STATUS -> const.PENDING_STATUS,
       const.ADDED_AT -> timestamp,
       const.LAST_STATUS_CHANGE -> timestamp
-    )
+    )  */
   }
 
   def updateStatus(id: Int, status: String) {
