@@ -8,3 +8,5 @@ libraryDependencies += "com.github.seratch" % "awscala_2.10" % "[0.2,)"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test"
 
+libraryDependencies += "io.argonaut" %% "argonaut" % "6.0.4"
+
