@@ -1,15 +1,10 @@
 package aws
 
-/**
- * User: cameron
- * Date: 4/14/14
- * Time: 3:26 PM
- * Creates all buckets and tables used by the DSS
- */
-
 import _root_.dynamo.DynamoAccessor
-import awscala._, s3._, dynamodbv2._
-import constants.{FarmChannelConstants, JobStatusTableConstants}
+import awscala._, dynamodbv2._
+import awscala.s3.S3
+import awscala.s3.Bucket
+import constants.{ModuleConstants, FarmChannelConstants, JobStatusTableConstants}
 
 object AWSInitialization extends DynamoAccessor with UsesPrefix {
   implicit val s3 = S3()
@@ -20,6 +15,7 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix {
 
     ensureJobStatusTableExists
     ensureChannelFarmTableExists
+    ensureModuleConfigurationTableExists
   }
 
   private def ensureBucketExists(name: String) = {
@@ -57,6 +53,20 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix {
         rangePK = const.FARM_ID -> const.FARM_ID_TYPE,
         otherAttributes = Seq(),
         indexes = Seq()
+      )
+    }
+  }
+
+  private def ensureModuleConfigurationTableExists = {
+    implicit val const = ModuleConstants
+
+    val tableName: String = build(const.TABLE_NAME)
+    val table: Option[Table] = dynamo.table(tableName)
+
+    if (table.isEmpty) {
+      dynamo.createTable(
+        name = tableName,
+        hashPK = const.MODULE_NAME_VERSION -> const.MODULE_NAME_VERSION_TYPE
       )
     }
   }

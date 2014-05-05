@@ -1,6 +1,6 @@
 package s3
 
-import awscala._, s3._, dynamodbv2._
+import awscala.s3.S3
 
 trait S3Accessor {
   implicit val s3 = S3()
