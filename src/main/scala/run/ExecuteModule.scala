@@ -60,7 +60,7 @@ class ExecuteModule {
 
   def moduleFinished(job: JobInfo, stdout: File, stderr: File, exitCode: Int): Unit = {
     if (exitCode == const.SUCCESS_CODE) {
-      if (true /*valid output*/) {
+      if (runDataAccessor.isValid(stdout, job)) {
         runDataAccessor.writeRunData(job, "out", stdout)
 
         jobStatusAccessor.updateStatus(job.jobId, JobStatus.Success)
