@@ -18,4 +18,8 @@ object ModuleConstants {
   val TIMEOUT_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
 
   val BUCKET_NAME: String = "modules"
+
+  val SUCCESS_CODE : Int = 0
+  val RETRYABLE_ERROR_CODE : Int = 1
+  val TIMEOUT_CODE : Int = -1
 }

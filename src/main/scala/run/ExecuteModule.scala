@@ -8,8 +8,13 @@ import aws.dynamo.ModuleConfigurationAccessor
 import aws.s3.ModuleAccessor
 import java.io._
 import org.apache.commons.io.IOUtils
+import constants.ModuleConstants
 
 class ExecuteModule {
+  val MAX_RETRIES: Int = 3
+
+  implicit val const = ModuleConstants
+
   val jobStatusAccessor: JobStatusAccessor = new JobStatusAccessor
   val moduleConfAccessor: ModuleConfigurationAccessor = new ModuleConfigurationAccessor
   val moduleAccessor = new ModuleAccessor
@@ -53,8 +58,8 @@ class ExecuteModule {
 
   }
 
-  def moduleFinished(job: JobInfo, stdout: File, stderr: File, exitCode: Int) = {
-    if (exitCode == 0) {
+  def moduleFinished(job: JobInfo, stdout: File, stderr: File, exitCode: Int): Unit = {
+    if (exitCode == const.SUCCESS_CODE) {
       if (true /*valid output*/) {
         runDataAccessor.writeRunData(job, "out", stdout)
 
@@ -72,12 +77,24 @@ class ExecuteModule {
 
         jobStatusAccessor.updateStatus(job.jobId, JobStatus.ErrorInvalidOutput)
       }
+    } else if (exitCode == const.RETRYABLE_ERROR_CODE || exitCode == const.TIMEOUT_CODE) {
+      job.attempt += 1
+
+      if (job.attempt > MAX_RETRIES) {
+        jobStatusAccessor.updateStatus(job.jobId, JobStatus.RetriesExceeded)
+      } else {
+        jobStatusAccessor.updateStatus(job.jobId, JobStatus.Pending)
+
+        /*Submit to internal job queue?*/
+        run(job)
+      }
     } else {
-      jobStatusAccessor.updateStatus(job.jobId, JobStatus.Error)
+      jobStatusAccessor.updateStatus(job.jobId, JobStatus.NoRetryError)
     }
 
     runDataAccessor.writeRunData(job, "err", stderr)
+
+    stdout.delete()
+    stderr.delete()
   }
-
-
 }

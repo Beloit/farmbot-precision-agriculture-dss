@@ -16,7 +16,7 @@ class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
 
   var table: Table = dynamo.table(build(const.TABLE_NAME)).get
 
-  def addModule(module: Module, persistent: Boolean, timeout: Int) = {
+  def addModule(module: Module, persistent: Boolean, timeoutSeconds: Int) = {
     var persistentS = "NO"
 
     if (persistent) {
@@ -25,7 +25,7 @@ class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
 
     table.putItem(module.key,
       const.PERSISTENT -> persistentS,
-      const.TIMEOUT -> timeout)
+      const.TIMEOUT -> timeoutSeconds)
   }
 
   def isModulePersistent(module: Module): Boolean = {

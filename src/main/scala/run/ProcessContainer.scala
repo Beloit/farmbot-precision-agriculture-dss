@@ -4,6 +4,7 @@ import scala.sys.process.{Process, ProcessIO}
 import java.io._
 import org.apache.commons.io.IOUtils
 import types.JobInfo
+import constants.ModuleConstants
 
 class ProcessContainer(val job: JobInfo, val executable: File, val input: InputStream, val finished: (JobInfo, File, File, Int) => Unit) {
   val outFile = File.createTempFile("dss-out", ".json")
@@ -42,6 +43,8 @@ class ProcessContainer(val job: JobInfo, val executable: File, val input: InputS
     if (runningProcess.isDefined) {
       runningProcess.get.destroy
       runningProcess = Option.empty[Process]
+
+      finish(ModuleConstants.TIMEOUT_CODE)
     }
   }
 

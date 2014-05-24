@@ -22,7 +22,7 @@ object ProcessHandler {
 
     val stopThread = new Thread(new Runnable{
       def run = {
-        Thread.sleep(timeout * 60 * 1000)
+        Thread.sleep(timeout * 1000)
         pc.stop
       }
     })
