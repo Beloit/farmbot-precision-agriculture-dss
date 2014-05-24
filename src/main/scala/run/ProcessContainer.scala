@@ -31,7 +31,9 @@ class ProcessContainer(val job: JobInfo, val executable: File, val input: InputS
   }
 
   def start = {
-    runningProcess = Option.apply(Process(executable.getAbsolutePath).run(io))
+    val args = List("-farmID", job.farmId, "-resourceID", job.resourceId)
+
+    runningProcess = Option.apply(Process.apply(executable.getAbsolutePath, args).run(io))
     new Thread(new Runnable {
       def run = {
         finish(runningProcess.get.exitValue)

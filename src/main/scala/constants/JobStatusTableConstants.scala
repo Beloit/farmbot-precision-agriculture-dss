@@ -28,6 +28,9 @@ object JobStatusTableConstants {
   val FARM_ID: String = "FarmID"
   val FARM_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 
+  val RESOURCE_ID: String = "ResourceID"
+  val RESOURCE_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
   val CHANNEL: String = "Channel"
   val CHANNEL_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 

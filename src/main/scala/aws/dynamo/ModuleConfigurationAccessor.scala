@@ -3,13 +3,8 @@ package aws.dynamo
 import constants.ModuleConstants
 import awscala.dynamodbv2.{Item, Table}
 import dynamo.DynamoAccessor
-import types.{Module, JobInfo}
-import awscala.DateTime
-import constants.JobStatusTableConstants.JobStatus
-import org.joda.time.format.ISODateTimeFormat
-import constants.JobStatusTableConstants.JobStatus._
+import types.Module
 import aws.UsesPrefix
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 
 class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
   implicit val const = ModuleConstants

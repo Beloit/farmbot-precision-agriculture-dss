@@ -4,7 +4,7 @@ import dynamo.JobStatusAccessor
 import org.scalatest.FlatSpec
 import awscala.{Region, CredentialsLoader}
 import helper.RequiresAWS
-import types.JobInfo
+import types.{Module, JobInfo}
 import awscala.dynamodbv2.{Table, DynamoDB}
 import aws.UsesPrefix
 import constants.JobStatusTableConstants
@@ -16,13 +16,18 @@ class JobStatusAccessorTest extends FlatSpec with RequiresAWS with UsesPrefix {
   val table: Table = dynamo.table(build(const.TABLE_NAME)).get
 
   def withJob(testCode: String => Any) {
+    val module = new Module{
+      name = "a module"
+      version = 5
+    }
+
     val ji = new JobInfo {
       attempt = 0
       channel = "TestChannel"
       channelVersion = 1
       farmId = "Somefarm"
-      module = "a module"
-      moduleVersion = 5
+      resourceId = "someResource"
+      module = module
     }
 
     val jsa = new JobStatusAccessor

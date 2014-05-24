@@ -11,6 +11,7 @@ import org.joda.time.DateTime
  */
 class JobInfo {
   var farmId: String = _
+  var resourceId: String = _
   var channel: String = _
   var channelVersion: Int = _
   var module: Module = _
@@ -26,6 +27,7 @@ class JobInfo {
     id += module.toString()
     id += attempt
     id += farmId
+    id += resourceId
     id += channel
     id += module
     id += addedAt.toString()
@@ -43,12 +45,13 @@ class JobInfo {
     ji.attempt = attempt
     ji.addedAt = addedAt
     ji.lastStatusChange = lastStatusChange
+    ji.resourceId = resourceId
 
     ji
   }
 
   override def toString : String = {
-    String.format("farmID: %s, channel: %s, version: %d, module: %s, attempt: %d, addetAt: %s, lastStatusChange: %s",
-      farmId, channel, channelVersion, module.toString, attempt, addedAt.toString, lastStatusChange.toString)
+    String.format("farmID: %s, resourceID: %s, channel: %s, version: %d, module: %s, attempt: %d, addetAt: %s, lastStatusChange: %s",
+      farmId, resourceId, channel, channelVersion, module.toString, attempt, addedAt.toString, lastStatusChange.toString)
   }
 }

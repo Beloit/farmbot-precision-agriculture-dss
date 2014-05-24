@@ -26,6 +26,7 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
 
     table.putItem(info.jobId,
       const.FARM_ID -> info.farmId,
+      const.RESOURCE_ID -> info.resourceId,
       const.CHANNEL -> info.channel,
       const.CHANNEL_VERSION -> info.channelVersion,
       const.MODULE -> info.module.name,
