@@ -15,8 +15,4 @@ object ModuleConstants {
   val PERSISTENT_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 
   val BUCKET_NAME: String = "modules"
-
-  val KEY_FORMAT: String = "%s_%s"
-
-  def key(module: String, version: Int): String = return String.format(KEY_FORMAT, module, version.toString)
 }

@@ -13,8 +13,7 @@ class JobInfo {
   var farmId: String = _
   var channel: String = _
   var channelVersion: Int = _
-  var module: String = _
-  var moduleVersion: Int = _
+  var module: Module = _
   var attempt: Int = _
   var addedAt: DateTime = _
   var lastStatusChange: DateTime = _
@@ -24,7 +23,7 @@ class JobInfo {
    */
   def jobId : String = {
     var id: String = channelVersion.toString
-    id += moduleVersion
+    id += module.toString()
     id += attempt
     id += farmId
     id += channel
@@ -33,5 +32,18 @@ class JobInfo {
     id += lastStatusChange.toString()
 
     return id.hashCode.toHexString
+  }
+
+  def copy : JobInfo = {
+    val ji = new JobInfo
+    ji.farmId = farmId
+    ji.channel = channel
+    ji.channelVersion = channelVersion
+    ji.module = module
+    ji.attempt = attempt
+    ji.addedAt = addedAt
+    ji.lastStatusChange = lastStatusChange
+
+    ji
   }
 }

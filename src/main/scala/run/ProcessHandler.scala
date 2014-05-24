@@ -1,7 +1,8 @@
 package run
 
 import scala.collection.mutable.HashMap
-import java.io.File
+import java.io.{InputStream, OutputStream, File}
+import types.JobInfo
 
 object ProcessHandler {
   private val persistentProcesses = new HashMap[String, ProcessContainer]
@@ -14,10 +15,10 @@ object ProcessHandler {
      */
   }
 
-  def startInstanceProcess(executable: File, input: Array[Byte], timeout: Int, finished: (File, File, Int) => Unit) = {
+  def startInstanceProcess(job: JobInfo, executable: File, input: InputStream, timeout: Int, finished: (JobInfo, File, File, Int) => Unit) = {
     executable.setExecutable(true, true)
 
-    val pc = new ProcessContainer(executable, input, finished)
+    val pc = new ProcessContainer(job, executable, input, finished)
 
     val stopThread = new Thread(new Runnable{
       def run = {

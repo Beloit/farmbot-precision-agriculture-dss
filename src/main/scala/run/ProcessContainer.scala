@@ -2,8 +2,10 @@ package run
 
 import scala.sys.process.{Process, ProcessIO}
 import java.io._
+import org.apache.commons.io.IOUtils
+import types.JobInfo
 
-class ProcessContainer(val executable: File, val input: Array[Byte], val finished: (File, File, Int) => Unit) {
+class ProcessContainer(val job: JobInfo, val executable: File, val input: InputStream, val finished: (JobInfo, File, File, Int) => Unit) {
   val outFile = File.createTempFile("dss-out", ".json")
   val errFile = File.createTempFile("dss-err", ".json")
 
@@ -17,22 +19,14 @@ class ProcessContainer(val executable: File, val input: Array[Byte], val finishe
     out => record(out, outFileStream),
     err => record(err, errFileStream))
 
-  def record(input: InputStream, toWrite: OutputStream) = {
-    val buf = Array.ofDim(1000)[Byte]
-
-    var numRead: Int = -1
-    do {
-      numRead = input.read(buf)
-      outFileStream.write(buf, 0, numRead)
-    } while (numRead >= 0)
-
-    input.close
+  def record(input: InputStream, output: OutputStream) = {
+    IOUtils.copy(input, output)
+    IOUtils.closeQuietly(input)
   }
 
   def read(output: OutputStream) = {
-    output.write(input)
-
-    output.close()
+    IOUtils.copy(input, output)
+    IOUtils.closeQuietly(output)
   }
 
   def start = {
@@ -53,11 +47,11 @@ class ProcessContainer(val executable: File, val input: Array[Byte], val finishe
 
   def finish(exitCode: Int) = {
     outFileStream.flush
-    outFileStream.close
+    IOUtils.closeQuietly(outFileStream)
 
     errFileStream.flush
-    errFileStream.close
+    IOUtils.closeQuietly(errFileStream)
 
-    finished(outFile, errFile, exitCode)
+    finished(job, outFile, errFile, exitCode)
   }
 }

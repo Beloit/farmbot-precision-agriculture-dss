@@ -28,8 +28,8 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
       const.FARM_ID -> info.farmId,
       const.CHANNEL -> info.channel,
       const.CHANNEL_VERSION -> info.channelVersion,
-      const.MODULE -> info.module,
-      const.MODULE_VERSION -> info.moduleVersion,
+      const.MODULE -> info.module.name,
+      const.MODULE_VERSION -> info.module.version,
       const.STATUS -> JobStatus.Pending.toString,
       const.ADDED_AT -> info.addedAt.toString(ISODateTimeFormat.dateTime()),
       const.LAST_STATUS_CHANGE -> info.lastStatusChange.toString(ISODateTimeFormat.dateTime())

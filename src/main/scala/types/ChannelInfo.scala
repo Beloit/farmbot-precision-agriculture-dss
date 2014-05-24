@@ -1,6 +1,5 @@
 package types
 
-import RunFrequency._
 import argonaut._, Argonaut._
 
 /*

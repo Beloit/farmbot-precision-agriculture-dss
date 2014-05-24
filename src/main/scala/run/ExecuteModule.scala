@@ -1,40 +1,70 @@
 package run
 
 import dynamo.JobStatusAccessor
-import types.JobInfo
+import s3.{ChannelInfoAccessor, RunDataAccessor}
+import types.{Module, JobInfo}
 import constants.JobStatusTableConstants.JobStatus
 import aws.dynamo.ModuleConfigurationAccessor
 import aws.s3.ModuleAccessor
-import java.io.File
+import java.io.{FileOutputStream, FileInputStream, File}
+import org.apache.commons.io.IOUtils
 
 class ExecuteModule {
   val jobStatusAccessor: JobStatusAccessor = new JobStatusAccessor
   val moduleConfAccessor: ModuleConfigurationAccessor = new ModuleConfigurationAccessor
   val moduleAccessor = new ModuleAccessor
+  val runDataAccessor = new RunDataAccessor
 
-  def run(job: JobInfo, inputKey: String) = {
-    /*if (moduleConfAccessor.isModulePersistent(job.module, job.moduleVersion)) {
+  def run(job: JobInfo) = {
+    if (false /*moduleConfAccessor.isModulePersistent(job.module, job.moduleVersion)*/) {
 
     } else {
+      val executableFile = moduleAccessor.getModuleExecutable(job.module)
 
-    }*/
-    val executableFile = moduleAccessor.getModuleExecutable(job.module, job.moduleVersion)
+      if (executableFile.isDefined) {
+        val previousModule = runDataAccessor.findPreviousModule(job);
 
-    if (executableFile.isDefined) {
-      //Get input file from S3!!!
+        val previousJob = job.copy
+        previousJob.module = previousModule
 
-      ProcessHandler.startInstanceProcess(executableFile.get, Array.ofDim(100)[Byte], 10, moduleFinished)
+        val previousOutput: Option[File] = runDataAccessor.getRunData(previousJob, "out")
 
-      jobStatusAccessor.updateStatus(job.jobId, JobStatus.Running)
+        if (previousOutput.isDefined) {
+          jobStatusAccessor.updateStatus(job.jobId, JobStatus.Running)
 
+          val inStream = new FileInputStream(previousOutput.get)
+
+          ProcessHandler.startInstanceProcess(job, executableFile.get, inStream, 10, moduleFinished)
+        }
+
+      }
     }
-
-
-
   }
 
-  def moduleFinished(stdout: File, stderr: File, exitCode: Int) = {
-    //Write outputs to S3 and verify that they are valid
+  def moduleFinished(job: JobInfo, stdout: File, stderr: File, exitCode: Int) = {
+    if (exitCode == 0) {
+      if (true /*valid output*/) {
+        runDataAccessor.writeRunData(job, "out", stdout)
+
+        jobStatusAccessor.updateStatus(job.jobId, JobStatus.Success)
+      } else {
+        val errFileStream = new FileOutputStream(stderr)
+        val outFileStream = new FileInputStream(stdout)
+
+        IOUtils.write("\nOutput was invalid, attaching output below:\n", errFileStream)
+
+        IOUtils.copy(outFileStream, errFileStream)
+
+        IOUtils.closeQuietly(outFileStream)
+        IOUtils.closeQuietly(errFileStream)
+
+        jobStatusAccessor.updateStatus(job.jobId, JobStatus.ErrorInvalidOutput)
+      }
+    } else {
+      jobStatusAccessor.updateStatus(job.jobId, JobStatus.Error)
+    }
+
+    runDataAccessor.writeRunData(job, "err", stderr)
   }
 
 
