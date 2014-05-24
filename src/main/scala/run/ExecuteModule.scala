@@ -6,7 +6,7 @@ import types.{Module, JobInfo}
 import constants.JobStatusTableConstants.JobStatus
 import aws.dynamo.ModuleConfigurationAccessor
 import aws.s3.ModuleAccessor
-import java.io.{FileOutputStream, FileInputStream, File}
+import java.io._
 import org.apache.commons.io.IOUtils
 
 class ExecuteModule {
@@ -14,31 +14,43 @@ class ExecuteModule {
   val moduleConfAccessor: ModuleConfigurationAccessor = new ModuleConfigurationAccessor
   val moduleAccessor = new ModuleAccessor
   val runDataAccessor = new RunDataAccessor
+  val channelInfoAcessor = new ChannelInfoAccessor
 
   def run(job: JobInfo) = {
-    if (false /*moduleConfAccessor.isModulePersistent(job.module, job.moduleVersion)*/) {
+    moduleConfAccessor.populateModuleConfiguration(job.module)
+
+    if (false /*module.persistent*/) {
 
     } else {
       val executableFile = moduleAccessor.getModuleExecutable(job.module)
 
       if (executableFile.isDefined) {
-        val previousModule = runDataAccessor.findPreviousModule(job);
+        val previousModule : Option[Module] = runDataAccessor.findPreviousModule(job);
 
-        val previousJob = job.copy
-        previousJob.module = previousModule
+        var inStream : InputStream = null
 
-        val previousOutput: Option[File] = runDataAccessor.getRunData(previousJob, "out")
+        if (previousModule.isDefined) {
+          val previousJob = job.copy
+          previousJob.module = previousModule.get
 
-        if (previousOutput.isDefined) {
-          jobStatusAccessor.updateStatus(job.jobId, JobStatus.Running)
+          val previousOutput: File = runDataAccessor.getRunData(previousJob, "out")
+          inStream = new FileInputStream(previousOutput)
+        } else {
+          val channelInfo = channelInfoAcessor.readChannelData(job.channel, job.channelVersion)
 
-          val inStream = new FileInputStream(previousOutput.get)
-
-          ProcessHandler.startInstanceProcess(job, executableFile.get, inStream, 10, moduleFinished)
+          inStream = new ByteArrayInputStream(channelInfo.initialInput.getBytes())
         }
 
+        jobStatusAccessor.updateStatus(job.jobId, JobStatus.Running)
+
+        ProcessHandler.startInstanceProcess(job, executableFile.get, inStream, job.module.timeout, moduleFinished)
+
+        IOUtils.closeQuietly(inStream)
       }
+
+      throw new RuntimeException("The module executable could not be found, module: " + job.module.toString)
     }
+
   }
 
   def moduleFinished(job: JobInfo, stdout: File, stderr: File, exitCode: Int) = {

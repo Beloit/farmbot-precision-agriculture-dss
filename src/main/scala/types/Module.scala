@@ -9,6 +9,9 @@ class Module {
   var name : String = _
   var version : Int = _
 
+  var persistent : Boolean = _
+  var timeout : Int = _
+
   val KEY_FORMAT: String = "%s_%s"
 
   /*
@@ -23,4 +26,8 @@ class Module {
   def ==(other : Module): Boolean = equals(other)
 
   def key: String = return String.format(KEY_FORMAT, name, version.toString)
+
+  override def toString : String = {
+    "name: " + name + ", version: " + version
+  }
 }

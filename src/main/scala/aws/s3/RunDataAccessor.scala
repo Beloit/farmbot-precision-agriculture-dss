@@ -41,7 +41,7 @@ class RunDataAccessor extends S3Accessor {
     return info.farmId + "/" + info.jobId + "/" + info.channel + "_" + info.channelVersion + "/" + info.module.name + "_" + info.module.version + "/" + runDataType + "_" + info.attempt;
   }
 
-  def getRunData(info : JobInfo, runDataType : String): Option[File] = {
+  def getRunData(info : JobInfo, runDataType : String): File = {
     val bucket: Option[Bucket] = s3.bucket("farmbot-dss-rundata")
 
     val s3Obj = bucket.get.get(createKey(info, runDataType))
@@ -51,13 +51,13 @@ class RunDataAccessor extends S3Accessor {
 
       Files.copy(s3Obj.get.content, file.toPath, StandardCopyOption.REPLACE_EXISTING)
 
-      return Option.apply(file)
-    } else {
-      return Option.empty[File]
+      return file
     }
+
+    throw new RuntimeException("The run data requested was not found, jobInfo: " + info.toString + ", type:" + runDataType)
   }
 
-  def findPreviousModule(job: JobInfo): Module = {
+  def findPreviousModule(job: JobInfo): Option[Module] = {
     val module = job.module
 
     val channelInfo = channelInfoAccessor.readChannelData(job.channel, job.channelVersion)
@@ -67,7 +67,9 @@ class RunDataAccessor extends S3Accessor {
     for (i <- 0 until channelInfo.modules.length) {
       if (channelInfo.modules(i) == module) {
         if (i > 0) {
-          return channelInfo.modules(i - 1)
+          return Option.apply(channelInfo.modules(i - 1))
+        } else {
+          return Option.empty[Module]
         }
       }
     }

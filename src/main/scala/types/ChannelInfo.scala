@@ -13,7 +13,7 @@ class ChannelInfo {
   var metadata : Map[String, String] = _
   var runFrequency : String = _
   var modules : List[Module] = _
-  
+  var initialInput : String = _
   /*
    * Currently this function is used to verify that a channel info object can be
    * converted to json, written to s3, read back from s3, then converted back

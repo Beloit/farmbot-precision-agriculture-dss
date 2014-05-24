@@ -16,7 +16,7 @@ class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
 
   var table: Table = dynamo.table(build(const.TABLE_NAME)).get
 
-  def addModule(module: Module, persistent: Boolean) = {
+  def addModule(module: Module, persistent: Boolean, timeout: Int) = {
     var persistentS = "NO"
 
     if (persistent) {
@@ -24,10 +24,21 @@ class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
     }
 
     table.putItem(module.key,
-      const.PERSISTENT -> persistentS)
+      const.PERSISTENT -> persistentS,
+      const.TIMEOUT -> timeout)
   }
 
   def isModulePersistent(module: Module): Boolean = {
     "yes" equalsIgnoreCase table.get(module.key).get.attributes.collectFirst({case i: Item => i.attributes.find(_.name.contentEquals(const.PERSISTENT)).get.value.s.get}).get
+  }
+
+  def getModuleTimeout(module: Module): Int = {
+    table.get(module.key).get.attributes.collectFirst({case i: Item => i.attributes.find(_.name.contentEquals(const.TIMEOUT)).get.value.n.get}).get.toInt
+  }
+
+  def populateModuleConfiguration(module: Module) = {
+    table.get(module.key).get.attributes.collectFirst({case i: Item =>
+      module.timeout = i.attributes.find(_.name.contentEquals(const.TIMEOUT)).get.value.n.get.toInt
+      module.persistent = i.attributes.find(_.name.contentEquals(const.PERSISTENT)).get.value.s.get equalsIgnoreCase("yes")})
   }
 }

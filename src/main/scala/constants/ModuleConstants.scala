@@ -14,5 +14,8 @@ object ModuleConstants {
   val PERSISTENT: String = "Persistent"
   val PERSISTENT_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 
+  val TIMEOUT: String = "Timeout"
+  val TIMEOUT_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
+
   val BUCKET_NAME: String = "modules"
 }
