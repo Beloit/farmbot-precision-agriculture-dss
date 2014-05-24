@@ -10,5 +10,6 @@ libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test"
 
 libraryDependencies += "io.argonaut" %% "argonaut" % "6.0.4"
 
-libraryDependencies += "org.apache.commons" % "commons-io" % "1.3.2"
+libraryDependencies += "com.github.fge" % "json-schema-validator" % "2.2.4"
 
+libraryDependencies += "org.apache.commons" % "commons-io" % "1.3.2"

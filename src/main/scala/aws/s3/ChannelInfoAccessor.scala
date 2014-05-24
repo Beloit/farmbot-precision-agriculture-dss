@@ -10,18 +10,20 @@ import types.ChannelInfo
 import types.Module
 import java.io.ByteArrayInputStream
 import java.io.FileOutputStream
+import aws.UsesPrefix
 
 /*
  * Accessor for farmbot channel info from s3. 
  */
-class ChannelInfoAccessor extends S3Accessor {
+class ChannelInfoAccessor extends S3Accessor with UsesPrefix {
   /*
    * Defines how to encode a Module object to json, all of these functions are
    * needed for the Argonaut json library
    */
   implicit def ModuleCodecJson: EncodeJson[Module] = 
     EncodeJson((module : Module) =>
-      ("name" := module.name) ->: ("version" := module.version) ->: jEmptyObject)
+      ("name" := module.name) ->: ("version" := module.version) ->: ("persistent" := module.persistent)
+      ->: ("timeout" := module.timeout) ->: jEmptyObject)
   
   /*
    * Defines how to encode a ChannelInfo object to json
@@ -29,7 +31,8 @@ class ChannelInfoAccessor extends S3Accessor {
   implicit def ChannelInfoEncodeJson: EncodeJson[ChannelInfo] = 
     EncodeJson((info : ChannelInfo) =>
       ("name" := info.name) ->: ("version" := info.version) ->: ("metadata" := info.metadata)
-        ->: ("runFrequency" := info.runFrequency) ->: ("modules" := info.modules) ->: jEmptyObject)
+        ->: ("runFrequency" := info.runFrequency) ->: ("modules" := info.modules) 
+        ->: ("initialInput" := info.initialInput) ->: ("schema" := info.schema) ->: jEmptyObject)
         
   /*
    * Defines how to decode json to a ChannelInfo object 
@@ -40,13 +43,18 @@ class ChannelInfoAccessor extends S3Accessor {
       channelVersion <- (c --\ "version").as[Int]
       channelMetadata <- (c --\ "metadata").as[Map[String, String]]
       channelRunFrequency <- (c --\ "runFrequency").as[String]
-      channelModules <- (c --\ "modules").as[List[Module]]  
+      channelModules <- (c --\ "modules").as[List[Module]]
+      channelInitialInput <- (c --\ "initialInput").as[String]
+      channelSchema <- (c --\ "schema").as[String]
+      
     } yield new ChannelInfo() {
       name = channelName
       version = channelVersion
       metadata = channelMetadata
       runFrequency = channelRunFrequency
       modules = channelModules
+      initialInput = channelInitialInput
+      schema = channelSchema
     }) 
     
   /*
@@ -56,9 +64,13 @@ class ChannelInfoAccessor extends S3Accessor {
     DecodeJson(c => for {
       moduleName <- (c --\ "name").as[String]
       moduleVersion <- (c --\ "version").as[Int]
+      modulePersistent <- (c --\ "persistent").as[Boolean]
+      moduleTimeout <- (c --\ "timeout").as[Int]
     } yield new Module() {
       name = moduleName
       version = moduleVersion
+      persistent = modulePersistent
+      timeout = moduleTimeout
     })
      
    /*
@@ -67,13 +79,12 @@ class ChannelInfoAccessor extends S3Accessor {
     */
    def writeChannelData(info : ChannelInfo) {
      val key : String = info.name + "/" + info.version
-     val bucket: Option[Bucket] = s3.bucket("cameron-farmbot-dss-chanels")
+     val bucket: Option[Bucket] = s3.bucket(build("farmbot-dss-chanels"))
      
      val json : Json = info.asJson
      val prettyprinted: String = json.spaces2
      var jsonString : String = info.name + "_" + info.version + " " + prettyprinted
      
-     // println(prettyprinted)
      BasicIO.transferFully(new ByteArrayInputStream(prettyprinted.getBytes("UTF-8")), new FileOutputStream("tempfile"))
      val file : File = new File("tempfile")
      
@@ -87,7 +98,7 @@ class ChannelInfoAccessor extends S3Accessor {
    */
   def readChannelData(name : String, version : Int): ChannelInfo = {
     val key : String = name + "/" + version
-    val bucket: Option[Bucket] = s3.bucket("cameron-farmbot-dss-chanels")
+    val bucket: Option[Bucket] = s3.bucket(build("farmbot-dss-chanels"))
     
     val s3Object = bucket.get.getObject(key)
     var s3String : String = ""
