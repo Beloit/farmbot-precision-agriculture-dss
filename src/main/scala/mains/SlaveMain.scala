@@ -1,0 +1,5 @@
+package mains
+
+object SlaveMain {
+
+}
