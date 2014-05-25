@@ -62,6 +62,6 @@ object JobStatusTableConstants {
   object JobStatus extends Enumeration {
     type JobStatus = Value
 
-    val Pending, Running, NoRetryError, Success, ErrorInvalidOutput, RetriesExceeded = Value
+    val Pending, Ready, Running, NoRetryError, Success, ErrorInvalidOutput, RetriesExceeded = Value
   }
 }
