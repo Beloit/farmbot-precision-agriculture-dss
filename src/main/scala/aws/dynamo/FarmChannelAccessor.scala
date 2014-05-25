@@ -5,17 +5,17 @@ import constants.FarmChannelConstants
 import aws.UsesPrefix
 import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ComparisonOperator, Condition}
 import scala.collection.mutable
+import types.FarmChannel
 
 class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
   implicit val const = FarmChannelConstants
 
   val table: Table = dynamo.table(prefix + const.TABLE_NAME).get
 
-  def addEntry(channel: String, version: Int, farmId: String) {
-    val channelAndVersion = channel + "_" + version
-
-    table.putItem(channelAndVersion,
-      const.FARM_ID -> farmId)
+  def addEntry(farmChannel: FarmChannel) {
+    table.putItem(farmChannel.key,
+      const.FARM_ID -> farmChannel.farmID,
+      const.SCHEDULE -> farmChannel.schedule)
   }
 
   def getFarmIdsForChannelVersion(channel: String, version: Int): Seq[String] = {
