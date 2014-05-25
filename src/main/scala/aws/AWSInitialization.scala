@@ -1,14 +1,15 @@
 package aws
 
 import _root_.dynamo.DynamoAccessor
+import _root_.s3.S3Accessor
 import awscala._, dynamodbv2._
 import awscala.s3.S3
 import awscala.s3.Bucket
 import constants.{ModuleConstants, FarmChannelConstants, JobStatusTableConstants}
+import com.amazonaws.services.dynamodbv2.model.{GlobalSecondaryIndex, KeySchemaElement, CreateTableRequest, AttributeDefinition}
+import java.util
 
-object AWSInitialization extends DynamoAccessor with UsesPrefix {
-  implicit val s3 = S3()
-
+object AWSInitialization extends DynamoAccessor with UsesPrefix with S3Accessor {
   def setup = {
     ensureBucketExists(build("farmbot-dss-rundata"))
     ensureBucketExists(build("farmbot-dss-chanels"))
@@ -33,13 +34,33 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix {
     val table: Option[Table] = dynamo.table(tableName)
 
     if (table.isEmpty) {
-      dynamo.createTable(
-        name = tableName,
-        hashPK = const.FARM_CHANNEL_ID -> const.FARM_CHANNEL_ID_TYPE,
-        rangePK = const.JOB_ID -> const.JOB_ID_TYPE,
-        otherAttributes = Seq(),
-        indexes = Seq()
-      )
+      val createTableRequest = new CreateTableRequest
+      createTableRequest.setTableName(tableName)
+
+      val keySchema = new util.ArrayList[KeySchemaElement]
+      keySchema.add(new KeySchema(const.FARM_CHANNEL_ID, KeyType.Hash))
+      keySchema.add(new KeySchema(const.JOB_ID, KeyType.Range))
+      createTableRequest.setKeySchema(keySchema)
+
+      val attributes = new util.ArrayList[AttributeDefinition]
+      attributes.add(new AttributeDefinition(const.FARM_CHANNEL_ID, const.FARM_CHANNEL_ID_TYPE))
+      attributes.add(new AttributeDefinition(const.JOB_ID, const.JOB_ID_TYPE))
+      createTableRequest.setAttributeDefinitions(attributes)
+
+      val globalSecondaryIndex = new GlobalSecondaryIndex
+      globalSecondaryIndex.setKeySchema(new util.ArrayList[KeySchemaElement]())
+      globalSecondaryIndex.getKeySchema.add(new KeySchema(const.STATUS, KeyType.Hash))
+
+      globalSecondaryIndex.setIndexName(const.STATUS + "-index")
+      globalSecondaryIndex.setProjection(new Projection(ProjectionType.All))
+      globalSecondaryIndex.setProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
+
+      createTableRequest.setGlobalSecondaryIndexes(new util.ArrayList[GlobalSecondaryIndex]())
+      createTableRequest.getGlobalSecondaryIndexes.add(globalSecondaryIndex)
+
+      createTableRequest.setProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
+
+      dynamo.createTable(createTableRequest)
     }
   }
 
@@ -57,6 +78,8 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix {
         otherAttributes = Seq(),
         indexes = Seq()
       )
+
+      dynamo.table(tableName).get.update(ProvisionedThroughput(1L, 1L))
     }
   }
 
@@ -71,6 +94,8 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix {
         name = tableName,
         hashPK = const.MODULE_NAME_VERSION -> const.MODULE_NAME_VERSION_TYPE
       )
+
+      dynamo.table(tableName).get.update(ProvisionedThroughput(1L, 1L))
     }
   }
 }

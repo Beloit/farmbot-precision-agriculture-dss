@@ -1,5 +1,5 @@
 package mains
 
-object SlaveMain {
+object SlaveMain extends App {
 
 }

@@ -46,4 +46,8 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
       Seq(const.STATUS -> status.toString,const.LAST_STATUS_CHANGE -> timestamp)
     )
   }
+
+  def findReadyJob : JobInfo = {
+
+  }
 }
