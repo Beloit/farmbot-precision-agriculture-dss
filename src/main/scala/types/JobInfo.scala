@@ -10,6 +10,7 @@ import org.joda.time.DateTime
  * Contains information required for a Job's status
  */
 class JobInfo {
+  var farmChannelId: String = _
   var farmId: String = _
   var resourceId: String = _
   var channel: String = _
@@ -18,6 +19,8 @@ class JobInfo {
   var attempt: Int = _
   var addedAt: DateTime = _
   var lastStatusChange: DateTime = _
+  var nextId: String = _
+  var previousId: String = _
 
   /*
   Idk if this is really a good way of doing this...
@@ -25,13 +28,11 @@ class JobInfo {
   def jobId : String = {
     var id: String = channelVersion.toString
     id += module.toString()
-    id += attempt
     id += farmId
     id += resourceId
     id += channel
     id += module
     id += addedAt.toString()
-    id += lastStatusChange.toString()
 
     return id.hashCode.toHexString
   }

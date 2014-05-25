@@ -17,10 +17,14 @@ import com.amazonaws.services.dynamodbv2
 object JobStatusTableConstants {
   val TABLE_NAME: String = "JobStatus"
 
-  val HASH_KEY: String = JOB_ID
+  val HASH_KEY: String = FARM_CHANNEL_ID
+  val RANGE_KEY: String = JOB_ID
 
   val JOB_ID: String = "JobId"
   val JOB_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val FARM_CHANNEL_ID: String = "FarmChannelId"
+  val FARM_CHANNEL_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 
   val ADDED_AT: String = "AddedAt"
   val ADDED_AT_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
@@ -43,14 +47,17 @@ object JobStatusTableConstants {
   val MODULE_VERSION: String = "ModuleVersion"
   val MODULE_VERSION_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
 
-  val ATTEMPT: String = "Attempt"
-  val ATTEMPT_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
-
   val STATUS: String = "Status"
   val STATUS_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 
   val LAST_STATUS_CHANGE: String = "LastStatusChange"
   val LAST_STATUS_CHANGE_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val NEXT_ID: String = "NextId"
+  val NEXT_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val PREVIOUS_ID: String = "PreviousId"
+  val PREVIOUS_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 
   object JobStatus extends Enumeration {
     type JobStatus = Value

@@ -43,7 +43,7 @@ class RunDataAccessor extends S3Accessor with UsesPrefix {
   }
    
   private def createKey(info : JobInfo, runDataType : String) : String = {
-    return info.farmId + "/" + info.jobId + "/" + info.channel + "_" + info.channelVersion + "/" + info.module.name + "_" + info.module.version + "/" + runDataType + "_" + info.attempt;
+    return info.farmId + "/" + info.jobId + "/" + runDataType;
   }
 
   def getRunData(info : JobInfo, runDataType : String): File = {
