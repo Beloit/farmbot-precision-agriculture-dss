@@ -6,6 +6,7 @@ scalaVersion := "2.10.4"
 
 libraryDependencies += "com.typesafe.scala-logging" % "scala-logging-slf4j_2.10" % "2.1.2"
 
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9"
 
 libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.7.11" force()
 
