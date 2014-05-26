@@ -81,8 +81,15 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
       job.resourceId = jobInfoMap.get(const.RESOURCE_ID).getS
       job.channel = jobInfoMap.get(const.CHANNEL).getS
       job.channelVersion = jobInfoMap.get(const.CHANNEL_VERSION).getN.toInt
-      job.previousId = jobInfoMap.get(const.PREVIOUS_ID).getS
-      job.nextId = jobInfoMap.get(const.NEXT_ID).getS
+
+      if (jobInfoMap.get(const.PREVIOUS_ID) != null) {
+        job.previousId = Option.apply(jobInfoMap.get(const.PREVIOUS_ID).getS)
+      }
+
+      if (jobInfoMap.get(const.NEXT_ID) != null) {
+        job.nextId = Option.apply(jobInfoMap.get(const.NEXT_ID).getS)
+      }
+
       job.module = new Module(){
         name = jobInfoMap.get(const.MODULE).getS
         version = jobInfoMap.get(const.MODULE_VERSION).getN.toInt

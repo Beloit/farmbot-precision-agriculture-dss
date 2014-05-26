@@ -19,8 +19,8 @@ class JobInfo {
   var attempt: Int = 0
   var addedAt: DateTime = _
   var lastStatusChange: DateTime = _
-  var nextId: String = _
-  var previousId: String = _
+  var nextId: Option[String] = Option.empty
+  var previousId: Option[String] = Option.empty
 
   /*
   Idk if this is really a good way of doing this...

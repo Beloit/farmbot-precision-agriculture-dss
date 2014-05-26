@@ -34,21 +34,19 @@ class ExecuteModule {
           jobStatusAccessor.updateStatus(job, JobStatus.Running, JobStatus.Ready)
         }
 
-        val previousModule : Option[Module] = runDataAccessor.findPreviousModule(job);
 
         var inStream : InputStream = null
 
-        if (previousModule.isDefined) {
-          val previousJob = job.copy
-          previousJob.module = previousModule.get
-
-          val previousOutput: File = runDataAccessor.getRunData(previousJob, "out")
+        if (job.previousId.isDefined) {
+          val previousOutput: File = runDataAccessor.getRunData(job.farmChannelId, job.previousId.get, "out")
           inStream = new FileInputStream(previousOutput)
         } else {
           val channelInfo = channelInfoAcessor.readChannelData(job.channel, job.channelVersion)
 
           inStream = new ByteArrayInputStream(channelInfo.initialInput.getBytes())
+
         }
+
 
         ProcessHandler.startInstanceProcess(job, executableFile.get, inStream, job.module.timeout, moduleFinished)
 
@@ -66,7 +64,10 @@ class ExecuteModule {
         runDataAccessor.writeRunData(job, "out", stdout)
 
         jobStatusAccessor.updateStatus(job, JobStatus.Success, JobStatus.Running)
-        jobStatusAccessor.updateStatus(job.farmChannelId, job.nextId, JobStatus.Ready, JobStatus.Pending)
+
+        if (job.nextId.isDefined) {
+          jobStatusAccessor.updateStatus(job.farmChannelId, job.nextId.get, JobStatus.Ready, JobStatus.Pending)
+        }
       } else {
         val errFileStream = new FileOutputStream(stderr)
         val outFileStream = new FileInputStream(stdout)
