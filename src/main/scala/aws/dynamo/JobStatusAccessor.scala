@@ -57,6 +57,8 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
     updateRequest.addAttributeUpdatesEntry(const.LAST_STATUS_CHANGE, new AttributeValueUpdate(new AttributeValue(timestamp), AttributeAction.PUT))
 
     updateRequest.addExpectedEntry(const.STATUS, new ExpectedAttributeValue().withValue(new AttributeValue(expectedStatus.toString)).withComparisonOperator(ComparisonOperator.EQ))
+
+    dynamo.updateItem(updateRequest)
   }
 
   def findReadyJob : Option[JobInfo] = {

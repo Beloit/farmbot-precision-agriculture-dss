@@ -19,6 +19,5 @@ object SlaveMain extends App {
         Thread.sleep(10 * ONE_SECOND)
       }
     }
-
   }
 }

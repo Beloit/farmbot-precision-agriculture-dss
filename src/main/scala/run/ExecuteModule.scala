@@ -30,6 +30,10 @@ class ExecuteModule {
       val executableFile = moduleAccessor.getModuleExecutable(job.module)
 
       if (executableFile.isDefined) {
+        if (job.attempt == 0) {
+          jobStatusAccessor.updateStatus(job, JobStatus.Running, JobStatus.Ready)
+        }
+
         val previousModule : Option[Module] = runDataAccessor.findPreviousModule(job);
 
         var inStream : InputStream = null
@@ -44,10 +48,6 @@ class ExecuteModule {
           val channelInfo = channelInfoAcessor.readChannelData(job.channel, job.channelVersion)
 
           inStream = new ByteArrayInputStream(channelInfo.initialInput.getBytes())
-        }
-
-        if (job.attempt == 0) {
-          jobStatusAccessor.updateStatus(job, JobStatus.Running, JobStatus.Ready)
         }
 
         ProcessHandler.startInstanceProcess(job, executableFile.get, inStream, job.module.timeout, moduleFinished)
