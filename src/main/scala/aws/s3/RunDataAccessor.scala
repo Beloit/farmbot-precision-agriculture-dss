@@ -6,10 +6,10 @@ import java.io.FileOutputStream
 import awscala._
 import awscala.s3._
 import java.nio.file.{StandardCopyOption, Files}
-import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
+import com.fasterxml.jackson.databind.JsonNode
+import com.github.fge.jackson.JsonLoader
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
-import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.github.fge.jsonschema.core.report.ProcessingReport
 import aws.UsesPrefix
 
 class RunDataAccessor extends S3Accessor with UsesPrefix {

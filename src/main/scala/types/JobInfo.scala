@@ -52,7 +52,7 @@ class JobInfo {
   }
 
   override def toString : String = {
-    String.format("farmID: %s, resourceID: %s, channel: %s, version: %d, module: %s, attempt: %d, addetAt: %s, lastStatusChange: %s",
-      farmId, resourceId, channel, channelVersion, module.toString, attempt, addedAt.toString, lastStatusChange.toString)
+    String.format("farmID: %s, resourceID: %s, channel: %s, version: %d, module: %s, attempt: %d",
+      farmId, resourceId, channel, channelVersion.toString, module.toString, attempt.toString)
   }
 }

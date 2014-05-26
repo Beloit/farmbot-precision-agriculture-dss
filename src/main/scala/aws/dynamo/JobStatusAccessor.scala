@@ -7,6 +7,9 @@ import constants.JobStatusTableConstants
 import constants.JobStatusTableConstants.JobStatus
 import constants.JobStatusTableConstants.JobStatus.JobStatus
 import aws.UsesPrefix
+import com.amazonaws.services.dynamodbv2.model.Condition
+import com.amazonaws.services.dynamodbv2
+import awscala.dynamodbv2
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,6 +51,8 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
   }
 
   def findReadyJob : JobInfo = {
-
+    /*stupid scala aws doesn't support queries well*/
+    /*table.queryWithIndex(LocalSecondaryIndex(const.STATUS, Seq(), null), Seq())*/
+    null
   }
 }
