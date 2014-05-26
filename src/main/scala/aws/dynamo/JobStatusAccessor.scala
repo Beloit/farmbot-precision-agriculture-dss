@@ -1,23 +1,17 @@
 package dynamo
 
-import types.JobInfo
+import types.{Module, JobInfo}
 import awscala._, dynamodbv2._
 import org.joda.time.format.ISODateTimeFormat
 import constants.JobStatusTableConstants
 import constants.JobStatusTableConstants.JobStatus
 import constants.JobStatusTableConstants.JobStatus.JobStatus
 import aws.UsesPrefix
-import com.amazonaws.services.dynamodbv2.model.Condition
+import com.amazonaws.services.dynamodbv2.model.{QueryResult, ComparisonOperator, QueryRequest, Condition}
 import com.amazonaws.services.dynamodbv2
 import awscala.dynamodbv2
+import java.util
 
-/**
- * Created with IntelliJ IDEA.
- * User: cameron
- * Date: 4/14/14
- * Time: 5:09 PM
- * Accessor for the JobStatus table
- */
 class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
   implicit val const = JobStatusTableConstants
 
@@ -50,9 +44,37 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
     )
   }
 
-  def findReadyJob : JobInfo = {
-    /*stupid scala aws doesn't support queries well*/
-    /*table.queryWithIndex(LocalSecondaryIndex(const.STATUS, Seq(), null), Seq())*/
-    null
+  def findReadyJob : Option[JobInfo] = {
+    val queryRequest :QueryRequest = new QueryRequest()
+      .withTableName(table.name)
+      .withIndexName(const.STATUS + "-index")
+      .withLimit(1)
+      .withSelect("ALL_ATTRIBUTES")
+      .withKeyConditions(new util.HashMap[String, Condition])
+
+      queryRequest.getKeyConditions.put(const.STATUS, new Condition().withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(JobStatus.Ready.toString)))
+
+    val result: QueryResult = dynamo.query(queryRequest)
+
+    if (result.getCount() == 1) {
+      val jobInfoMap = result.getItems.get(0)
+      val job: JobInfo = new JobInfo
+
+      job.farmId = jobInfoMap.get(const.FARM_ID).getS
+      job.resourceId = jobInfoMap.get(const.RESOURCE_ID).getS
+      job.channel = jobInfoMap.get(const.CHANNEL).getS
+      job.channelVersion = jobInfoMap.get(const.CHANNEL_VERSION).getN.toInt
+      job.module = new Module(){
+        name = jobInfoMap.get(const.MODULE).getS
+        version = jobInfoMap.get(const.MODULE_VERSION).getN.toInt
+      }
+
+      job.addedAt = DateTime.parse(jobInfoMap.get(const.ADDED_AT).getS, ISODateTimeFormat.dateTime())
+      job.lastStatusChange = DateTime.parse(jobInfoMap.get(const.LAST_STATUS_CHANGE).getS, ISODateTimeFormat.dateTime())
+
+      return Option.apply(job)
+    } else {
+      return Option.empty
+    }
   }
 }
