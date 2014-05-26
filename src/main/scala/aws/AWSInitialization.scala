@@ -5,7 +5,7 @@ import _root_.s3.S3Accessor
 import awscala._, dynamodbv2._
 import awscala.s3.S3
 import awscala.s3.Bucket
-import constants.{ModuleConstants, FarmChannelConstants, JobStatusTableConstants}
+import constants.{ModuleConstants, FarmChannelConstants, JobStatusTableConstants, ResourceConstants}
 import com.amazonaws.services.dynamodbv2.model.{GlobalSecondaryIndex, KeySchemaElement, CreateTableRequest, AttributeDefinition}
 import java.util
 
@@ -17,6 +17,7 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix with S3Accessor 
     ensureJobStatusTableExists
     ensureChannelFarmTableExists
     ensureModuleConfigurationTableExists
+    ensureResourceTableExists
   }
 
   private def ensureBucketExists(name: String) = {
@@ -96,6 +97,23 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix with S3Accessor 
       )
 
       dynamo.table(tableName).get.update(ProvisionedThroughput(1L, 1L))
+    }
+  }
+  
+  private def ensureResourceTableExists = {
+    implicit val const = ResourceConstants
+
+    val tableName: String = build(const.TABLE_NAME)
+    val table: Option[Table] = dynamo.table(tableName)
+
+    if (table.isEmpty) {
+      dynamo.createTable(
+        name = tableName,
+        hashPK = const.FARM_CHANNEL_ID -> const.FARM_CHANNEL_ID_TYPE,
+        rangePK = const.RESOURCE_ID -> const.RESOURCE_ID_TYPE,
+        otherAttributes = Seq(),
+        indexes = Seq()
+      )
     }
   }
 }
