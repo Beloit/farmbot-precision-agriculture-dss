@@ -19,4 +19,4 @@ project/plugins/project/
 # Cameron's IDE Specific
 *.iml
 .idea
-
+project/
