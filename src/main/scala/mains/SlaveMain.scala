@@ -2,8 +2,9 @@ package mains
 
 import dynamo.JobStatusAccessor
 import run.ExecuteModule
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
-object SlaveMain extends App {
+object SlaveMain extends App with StrictLogging {
   val jobStatusAccessor = new JobStatusAccessor
   val executeModule = new ExecuteModule
 
