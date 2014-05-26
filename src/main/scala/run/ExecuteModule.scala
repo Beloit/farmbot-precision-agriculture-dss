@@ -46,7 +46,9 @@ class ExecuteModule {
           inStream = new ByteArrayInputStream(channelInfo.initialInput.getBytes())
         }
 
-        jobStatusAccessor.updateStatus(job.jobId, JobStatus.Running)
+        if (job.attempt == 0) {
+          jobStatusAccessor.updateStatus(job, JobStatus.Running, JobStatus.Ready)
+        }
 
         ProcessHandler.startInstanceProcess(job, executableFile.get, inStream, job.module.timeout, moduleFinished)
 
@@ -63,7 +65,8 @@ class ExecuteModule {
       if (runDataAccessor.isValid(stdout, job)) {
         runDataAccessor.writeRunData(job, "out", stdout)
 
-        jobStatusAccessor.updateStatus(job.jobId, JobStatus.Success)
+        jobStatusAccessor.updateStatus(job, JobStatus.Success, JobStatus.Running)
+        jobStatusAccessor.updateStatus(job.farmChannelId, job.nextId, JobStatus.Ready, JobStatus.Pending)
       } else {
         val errFileStream = new FileOutputStream(stderr)
         val outFileStream = new FileInputStream(stdout)
@@ -75,21 +78,19 @@ class ExecuteModule {
         IOUtils.closeQuietly(outFileStream)
         IOUtils.closeQuietly(errFileStream)
 
-        jobStatusAccessor.updateStatus(job.jobId, JobStatus.ErrorInvalidOutput)
+        jobStatusAccessor.updateStatus(job, JobStatus.ErrorInvalidOutput, JobStatus.Running)
       }
     } else if (exitCode == const.RETRYABLE_ERROR_CODE || exitCode == const.TIMEOUT_CODE) {
       job.attempt += 1
 
       if (job.attempt > MAX_RETRIES) {
-        jobStatusAccessor.updateStatus(job.jobId, JobStatus.RetriesExceeded)
+        jobStatusAccessor.updateStatus(job, JobStatus.RetriesExceeded, JobStatus.Running)
       } else {
-        jobStatusAccessor.updateStatus(job.jobId, JobStatus.Pending)
-
         /*Submit to internal job queue?*/
         run(job)
       }
     } else {
-      jobStatusAccessor.updateStatus(job.jobId, JobStatus.NoRetryError)
+      jobStatusAccessor.updateStatus(job, JobStatus.NoRetryError, JobStatus.Running)
     }
 
     runDataAccessor.writeRunData(job, "err", stderr)

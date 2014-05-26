@@ -1,15 +1,16 @@
 package dynamo
 
 import types.{Module, JobInfo}
-import awscala._, dynamodbv2._
+import awscala._
 import org.joda.time.format.ISODateTimeFormat
 import constants.JobStatusTableConstants
 import constants.JobStatusTableConstants.JobStatus
 import constants.JobStatusTableConstants.JobStatus.JobStatus
 import aws.UsesPrefix
-import com.amazonaws.services.dynamodbv2.model.{QueryResult, ComparisonOperator, QueryRequest, Condition}
-import com.amazonaws.services.dynamodbv2
-import awscala.dynamodbv2
+import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.Condition
+import com.amazonaws.services.dynamodbv2.model.ExpectedAttributeValue
+import awscala.dynamodbv2.Table
 import java.util
 
 class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
@@ -21,7 +22,8 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
     info.addedAt = DateTime.now
     info.lastStatusChange = info.addedAt
 
-    table.putItem(info.jobId,
+    table.putItem(info.farmChannelId,
+      info.jobId,
       const.FARM_ID -> info.farmId,
       const.RESOURCE_ID -> info.resourceId,
       const.CHANNEL -> info.channel,
@@ -30,18 +32,31 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
       const.MODULE_VERSION -> info.module.version,
       const.STATUS -> JobStatus.Pending.toString,
       const.ADDED_AT -> info.addedAt.toString(ISODateTimeFormat.dateTime()),
-      const.LAST_STATUS_CHANGE -> info.lastStatusChange.toString(ISODateTimeFormat.dateTime())
+      const.LAST_STATUS_CHANGE -> info.lastStatusChange.toString(ISODateTimeFormat.dateTime()),
+      const.NEXT_ID -> info.nextId,
+      const.PREVIOUS_ID -> info.previousId
     )
 
     return info.jobId
   }
 
-  def updateStatus(jobId: String, status: JobStatus) {
+  def updateStatus(job: JobInfo, newStatus: JobStatus, expectedStatus: JobStatus) {
+    updateStatus(job.farmChannelId, job.jobId, newStatus, expectedStatus)
+  }
+
+  def updateStatus(farmChannelId: String, jobId: String, newStatus: JobStatus, expectedStatus: JobStatus) {
     val timestamp = DateTime.now().toString(ISODateTimeFormat.dateTime())
 
-    table.putAttributes(jobId,
-      Seq(const.STATUS -> status.toString,const.LAST_STATUS_CHANGE -> timestamp)
-    )
+    val updateRequest = new UpdateItemRequest()
+      .withTableName(table.name)
+
+    updateRequest.addKeyEntry(const.FARM_CHANNEL_ID, new AttributeValue(farmChannelId))
+    updateRequest.addKeyEntry(const.JOB_ID, new AttributeValue(jobId))
+
+    updateRequest.addAttributeUpdatesEntry(const.STATUS, new AttributeValueUpdate(new AttributeValue(newStatus.toString), AttributeAction.PUT))
+    updateRequest.addAttributeUpdatesEntry(const.LAST_STATUS_CHANGE, new AttributeValueUpdate(new AttributeValue(timestamp), AttributeAction.PUT))
+
+    updateRequest.addExpectedEntry(const.STATUS, new ExpectedAttributeValue().withValue(new AttributeValue(expectedStatus.toString)).withComparisonOperator(ComparisonOperator.EQ))
   }
 
   def findReadyJob : Option[JobInfo] = {
@@ -64,6 +79,8 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
       job.resourceId = jobInfoMap.get(const.RESOURCE_ID).getS
       job.channel = jobInfoMap.get(const.CHANNEL).getS
       job.channelVersion = jobInfoMap.get(const.CHANNEL_VERSION).getN.toInt
+      job.previousId = jobInfoMap.get(const.PREVIOUS_ID).getS
+      job.nextId = jobInfoMap.get(const.NEXT_ID).getS
       job.module = new Module(){
         name = jobInfoMap.get(const.MODULE).getS
         version = jobInfoMap.get(const.MODULE_VERSION).getN.toInt

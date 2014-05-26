@@ -16,7 +16,7 @@ class JobInfo {
   var channel: String = _
   var channelVersion: Int = _
   var module: Module = _
-  var attempt: Int = _
+  var attempt: Int = 0
   var addedAt: DateTime = _
   var lastStatusChange: DateTime = _
   var nextId: String = _
@@ -27,6 +27,7 @@ class JobInfo {
    */
   def jobId : String = {
     var id: String = channelVersion.toString
+    id += farmChannelId
     id += module.toString()
     id += farmId
     id += resourceId
@@ -47,6 +48,8 @@ class JobInfo {
     ji.addedAt = addedAt
     ji.lastStatusChange = lastStatusChange
     ji.resourceId = resourceId
+    ji.nextId = nextId
+    ji.previousId = previousId
 
     ji
   }
