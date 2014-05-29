@@ -3,14 +3,14 @@ package aws
 import _root_.dynamo.DynamoAccessor
 import _root_.s3.S3Accessor
 import awscala._, dynamodbv2._
-import awscala.s3.S3
 import awscala.s3.Bucket
 import constants.{ModuleConstants, FarmChannelConstants, JobStatusTableConstants, ResourceConstants}
-import com.amazonaws.services.dynamodbv2.model.{GlobalSecondaryIndex, KeySchemaElement, CreateTableRequest, AttributeDefinition}
+import com.amazonaws.services.dynamodbv2.model.{GlobalSecondaryIndex, KeySchemaElement, CreateTableRequest, AttributeDefinition, Projection, ProjectionType}
 import java.util
 
 object AWSInitialization extends DynamoAccessor with UsesPrefix with S3Accessor {
   def setup = {
+    ensureBucketExists(build(ModuleConstants.BUCKET_NAME))
     ensureBucketExists(build("farmbot-dss-rundata"))
     ensureBucketExists(build("farmbot-dss-chanels"))
 
@@ -46,6 +46,7 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix with S3Accessor 
       val attributes = new util.ArrayList[AttributeDefinition]
       attributes.add(new AttributeDefinition(const.FARM_CHANNEL_ID, const.FARM_CHANNEL_ID_TYPE))
       attributes.add(new AttributeDefinition(const.JOB_ID, const.JOB_ID_TYPE))
+      attributes.add(new AttributeDefinition(const.STATUS, const.STATUS_TYPE))
       createTableRequest.setAttributeDefinitions(attributes)
 
       val globalSecondaryIndex = new GlobalSecondaryIndex
@@ -53,7 +54,7 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix with S3Accessor 
       globalSecondaryIndex.getKeySchema.add(new KeySchema(const.STATUS, KeyType.Hash))
 
       globalSecondaryIndex.setIndexName(const.STATUS + "-index")
-      globalSecondaryIndex.setProjection(new Projection(ProjectionType.All))
+      globalSecondaryIndex.setProjection(new Projection().withProjectionType(ProjectionType.ALL))
       globalSecondaryIndex.setProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
 
       createTableRequest.setGlobalSecondaryIndexes(new util.ArrayList[GlobalSecondaryIndex]())
@@ -80,6 +81,8 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix with S3Accessor 
         indexes = Seq()
       )
 
+      Thread.sleep(10000)
+
       dynamo.table(tableName).get.update(ProvisionedThroughput(1L, 1L))
     }
   }
@@ -95,6 +98,8 @@ object AWSInitialization extends DynamoAccessor with UsesPrefix with S3Accessor 
         name = tableName,
         hashPK = const.MODULE_NAME_VERSION -> const.MODULE_NAME_VERSION_TYPE
       )
+
+      Thread.sleep(10000)
 
       dynamo.table(tableName).get.update(ProvisionedThroughput(1L, 1L))
     }

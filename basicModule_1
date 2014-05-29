@@ -1,0 +1,4 @@
+echo "{"
+echo "\"aKey\" : 42"
+echo "}"
+

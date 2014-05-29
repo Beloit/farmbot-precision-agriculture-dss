@@ -19,5 +19,3 @@ libraryDependencies += "io.argonaut" %% "argonaut" % "6.0.4"
 libraryDependencies += "com.github.fge" % "json-schema-validator" % "2.2.4"
 
 libraryDependencies += "org.apache.commons" % "commons-io" % "1.3.2"
-
-

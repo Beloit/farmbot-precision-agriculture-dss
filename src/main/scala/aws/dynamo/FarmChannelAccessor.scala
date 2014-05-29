@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat
 class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
   implicit val const = FarmChannelConstants
 
-  val table: Table = dynamo.table(prefix + const.TABLE_NAME).get
+  val table: Table = dynamo.table(build(const.TABLE_NAME)).get
 
   def addEntry(farmChannel: FarmChannel) {
     table.putItem(farmChannel.key,

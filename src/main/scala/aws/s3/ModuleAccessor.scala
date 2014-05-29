@@ -6,11 +6,12 @@ import s3.S3Accessor
 import awscala.s3.S3Object
 import java.nio.file.{StandardCopyOption, CopyOption, Files}
 import types.Module
+import aws.UsesPrefix
 
-class ModuleAccessor extends S3Accessor {
+class ModuleAccessor extends S3Accessor with UsesPrefix {
   implicit val const = ModuleConstants
 
-  val bucket = s3.bucket(const.BUCKET_NAME).get
+  val bucket = s3.bucket(build(const.BUCKET_NAME)).get
 
   def getModuleExecutable(module: Module): Option[File] = {
     val s3Obj: Option[S3Object] = bucket.get(module.key)

@@ -2,23 +2,32 @@ package mains
 
 import dynamo.JobStatusAccessor
 import run.ExecuteModule
-import com.typesafe.scalalogging.slf4j.StrictLogging
+import aws.AWSInitialization
+import scala.Predef._
 
-object SlaveMain extends App with StrictLogging {
-  val jobStatusAccessor = new JobStatusAccessor
-  val executeModule = new ExecuteModule
-
-  val ONE_SECOND = 1000
-
+object SlaveMain extends App {
   override def main(args: Array[String]) = {
-    while (true) {
-      val availableJob = jobStatusAccessor.findReadyJob
+    AWSInitialization.setup
 
+    val executeModule = new ExecuteModule
+    val jobStatusAccessor = new JobStatusAccessor
+
+    val ONE_SECOND : Int = 1000
+
+    val availableJob = jobStatusAccessor.findReadyJob
+
+    forever(
       if (availableJob.isDefined) {
         executeModule.run(availableJob.get)
       } else {
         Thread.sleep(10 * ONE_SECOND)
       }
-    }
+    )
+  }
+
+  def forever[A](body: => A): Nothing = {
+    body
+
+    forever(body)
   }
 }
