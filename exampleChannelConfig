@@ -22,13 +22,13 @@
   "initialInput" : "asdfffffffffffffffffffffffff",
   "schema" : 
     "{
-	  "title": "Channel Schema",
-	  "type": "object",
-	  "properties": {
-		"aKey": {
-			"type": "string"
+	  \"title\": \"Channel Schema\",
+	  \"type\": \"object\",
+	  \"properties\": {
+		\"aKey\": {
+			\"type\": \"string\"
 		}
 	  },
-	  "required": ["aKey"]
+	  \"required\": [\"aKey\"]
     }"
 }
