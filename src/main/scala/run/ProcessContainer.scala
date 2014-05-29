@@ -33,6 +33,8 @@ class ProcessContainer(val job: JobInfo, val executable: File, val input: InputS
   def start = {
     val args = List("-farmID", job.farmId, "-resourceID", job.resourceId)
 
+    Process.apply("chmod 777 " + executable.getAbsolutePath).run.exitValue
+
     runningProcess = Option.apply(Process.apply(executable.getAbsolutePath, args).run(io))
     new Thread(new Runnable {
       def run = {
