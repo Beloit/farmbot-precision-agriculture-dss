@@ -21,7 +21,8 @@ object MasterMain extends App {
   val channelInfoAccessor : ChannelInfoAccessor = new ChannelInfoAccessor()
   val jobStatusAccessor : JobStatusAccessor = new JobStatusAccessor()
   
-  val FIVE_MINUTES = 300000
+  //val FIVE_MINUTES = 300000
+  val FIVE_MINUTES = 60000
   
   var startTime : Long = 0
   var timeDiff : Long = 0
@@ -39,14 +40,15 @@ object MasterMain extends App {
   
   def createReadyJobs() {  
     startTime = System.currentTimeMillis()
+
     var farmChannels : Seq[FarmChannel] = farmChannelAccessor.getReadyJobs()
-  
+
     // for each ready farm channel:
     // farmChannel.id => key into resource table (needs to be created and accessor written)
     // get ResourceTable for farmChannel.id will get all the resourceIds for that farm channel
     for (farmChannel <- farmChannels) {
       var resources : Seq[String] = resourceTableAccessor.getResources(farmChannel.id)
-    
+
       // ChannelInfo => get ChannelInfo from accessor for the channel and version from the farm channel object
       // get list of modules for the channel from the ChannelInfo
       var channelInfo : ChannelInfo = channelInfoAccessor.readChannelData(farmChannel.channel, farmChannel.version)

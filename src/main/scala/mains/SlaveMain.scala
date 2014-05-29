@@ -25,7 +25,7 @@ object SlaveMain extends App {
 
   def forever[A](body: => A): Nothing = {
     body
-    println("yayay")
+
     forever(body)
   }
 }

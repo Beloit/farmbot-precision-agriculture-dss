@@ -8,6 +8,7 @@ import scala.collection.mutable
 import types.FarmChannel
 import java.util.Calendar
 import java.text.SimpleDateFormat
+import scala.collection.mutable.ArrayBuffer
 
 class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
   implicit val const = FarmChannelConstants
@@ -46,9 +47,9 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
     
     val hourlyItems = dynamo.scan(table, Seq(const.SCHEDULE_HOUR -> hourEmptyCond, const.SCHEDULE_MINUTE -> pastMinuteCondition))
     val dailyItems = dynamo.scan(table, Seq(const.SCHEDULE_HOUR -> hourNotEmptyCond, const.SCHEDULE_HOUR -> curHourCondition, const.SCHEDULE_MINUTE -> pastMinuteCondition))
-    
+
     val items = hourlyItems ++ dailyItems
-    var readyChannels : Seq[FarmChannel] = Seq[FarmChannel]();
+    var readyChannels  = ArrayBuffer[FarmChannel]();
     
     for (item <- items) {
       val channel : FarmChannel = new FarmChannel();
@@ -68,10 +69,10 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
           channel.scheduleMinute = value.getS
         }
       }
-      
-      readyChannels :+ channel
+
+      readyChannels += channel
     }
-    
+
     return readyChannels
   }
 
