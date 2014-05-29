@@ -11,6 +11,7 @@ import types.JobInfo
 import constants.JobStatusTableConstants
 import constants.JobStatusTableConstants.JobStatus
 import constants.JobStatusTableConstants.JobStatus.JobStatus
+import aws.AWSInitialization
 
 class MasterMain {
   // scan farm channel table (based on schedules and current time)
@@ -22,22 +23,24 @@ class MasterMain {
   
   val FIVE_MINUTES = 300000
   
-  override def main(args: Array[String]) = {
-     var startTime : Long = 0
-     var timeDiff : Long = 0
-     
-     while (true) {
-       startTime = System.currentTimeMillis()
+  var startTime : Long = 0
+  var timeDiff : Long = 0
+  
+  def main(args: Array[String]) = { 
+     AWSInitialization.setup
+     forever (
        createReadyJobs
-       timeDiff = System.currentTimeMillis() - startTime
-       
-       if (timeDiff < FIVE_MINUTES) {
-         Thread.sleep(FIVE_MINUTES - timeDiff)
-       }
-     }
+     )
+  }
+  
+  def forever[A](body: => A): Nothing = {
+    body
+    
+    forever(body)
   }
   
   def createReadyJobs() {  
+    startTime = System.currentTimeMillis()
     var farmChannels : Seq[FarmChannel] = farmChannelAccessor.getReadyJobs()
   
     // for each ready farm channel:
@@ -56,6 +59,12 @@ class MasterMain {
       
       addJobsForChannel(resources, modules, farmChannel, channelInfo)
     } 
+    
+    timeDiff = System.currentTimeMillis() - startTime
+       
+    if (timeDiff < FIVE_MINUTES) {
+      Thread.sleep(FIVE_MINUTES - timeDiff)
+    }
   }
   
   def addJobsForChannel(resources : Seq[String], modules : List[Module], farmChannel : FarmChannel, channelInfo : ChannelInfo) {
@@ -79,12 +88,12 @@ class MasterMain {
         }
          
         if (previous != null) {
-          current.previousId = previous.jobId
+          current.previousId = Option(previous.jobId)
         } else {
           current.previousId = null
         }
          
-        previous.nextId = current.jobId
+        previous.nextId = Option(current.jobId)
          
         // add previous entry to job table (initialized as pending)
         jobStatusAccessor.addEntry(previous)
@@ -100,7 +109,7 @@ class MasterMain {
       jobStatusAccessor.addEntry(current)
        
       // set first job (head) status as ready
-      jobStatusAccessor.updateStatus(head.jobId, JobStatus.Ready)
+      jobStatusAccessor.updateStatus(head.farmChannelId, head.jobId, JobStatus.Ready, JobStatus.Pending)
     }
   }
 }

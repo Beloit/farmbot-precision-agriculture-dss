@@ -31,8 +31,8 @@ class ChannelInfoAccessor extends S3Accessor with UsesPrefix {
   implicit def ChannelInfoEncodeJson: EncodeJson[ChannelInfo] = 
     EncodeJson((info : ChannelInfo) =>
       ("name" := info.name) ->: ("version" := info.version) ->: ("metadata" := info.metadata)
-        ->: ("runFrequency" := info.runFrequency) ->: ("modules" := info.modules) 
-        ->: ("initialInput" := info.initialInput) ->: ("schema" := info.schema) ->: jEmptyObject)
+        ->: ("modules" := info.modules) ->: ("initialInput" := info.initialInput) 
+        ->: ("schema" := info.schema) ->: jEmptyObject)
         
   /*
    * Defines how to decode json to a ChannelInfo object 
@@ -42,7 +42,6 @@ class ChannelInfoAccessor extends S3Accessor with UsesPrefix {
       channelName <- (c --\ "name").as[String]
       channelVersion <- (c --\ "version").as[Int]
       channelMetadata <- (c --\ "metadata").as[Map[String, String]]
-      channelRunFrequency <- (c --\ "runFrequency").as[String]
       channelModules <- (c --\ "modules").as[List[Module]]
       channelInitialInput <- (c --\ "initialInput").as[String]
       channelSchema <- (c --\ "schema").as[String]
@@ -51,7 +50,6 @@ class ChannelInfoAccessor extends S3Accessor with UsesPrefix {
       name = channelName
       version = channelVersion
       metadata = channelMetadata
-      runFrequency = channelRunFrequency
       modules = channelModules
       initialInput = channelInitialInput
       schema = channelSchema

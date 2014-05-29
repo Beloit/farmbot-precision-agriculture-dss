@@ -11,7 +11,6 @@ class ChannelInfo {
   var name : String = _
   var version : Int = _
   var metadata : Map[String, String] = _
-  var runFrequency : String = _
   var modules : List[Module] = _
   var initialInput : String = _
   var schema : String = _
@@ -29,9 +28,6 @@ class ChannelInfo {
       return false;
     } else if (!other.version.equals(version)) {
       println("versions not equal")
-      return false
-    } else if (!other.runFrequency.equals(runFrequency)) {
-      println("runFrequency not equal")
       return false
     } else if (!other.metadata.equals(metadata)) {
       println("metadata not equal")

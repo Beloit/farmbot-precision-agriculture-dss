@@ -1,0 +1,34 @@
+{
+  "name" : "baseChannel",
+  "version" : 1,
+  "modules" : [
+    {
+      "version" : 1,
+      "name" : "baseModule",
+      "persistent" : true,
+      "timeout" : 500000
+    },
+    {
+      "version" : 2,
+      "name" : "baseModule",
+      "persistent": true,
+      "timeout" : 500000
+    }
+  ],
+  "metadata" : {
+    "somekey" : "somedata",
+    "anotherkey" : anotherdata"
+  },
+  "initialInput" : "asdfffffffffffffffffffffffff",
+  "schema" : 
+    "{
+	  "title": "Channel Schema",
+	  "type": "object",
+	  "properties": {
+		"aKey": {
+			"type": "string"
+		}
+	  },
+	  "required": ["aKey"]
+    }"
+}
