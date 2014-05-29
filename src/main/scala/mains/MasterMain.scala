@@ -13,7 +13,7 @@ import constants.JobStatusTableConstants.JobStatus
 import constants.JobStatusTableConstants.JobStatus.JobStatus
 import aws.AWSInitialization
 
-class MasterMain {
+object MasterMain extends App {
   // scan farm channel table (based on schedules and current time)
   // should return farm channels that are currently ready
   val farmChannelAccessor : FarmChannelAccessor = new FarmChannelAccessor()
@@ -25,14 +25,12 @@ class MasterMain {
   
   var startTime : Long = 0
   var timeDiff : Long = 0
-  
-  def main(args: Array[String]) = { 
-     AWSInitialization.setup
-     forever (
-       createReadyJobs
-     )
-  }
-  
+
+   AWSInitialization.setup
+   forever (
+     createReadyJobs
+   )
+
   def forever[A](body: => A): Nothing = {
     body
     

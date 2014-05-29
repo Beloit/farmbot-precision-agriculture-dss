@@ -6,28 +6,26 @@ import aws.AWSInitialization
 import scala.Predef._
 
 object SlaveMain extends App {
-  override def main(args: Array[String]) = {
-    AWSInitialization.setup
+  AWSInitialization.setup
 
-    val executeModule = new ExecuteModule
-    val jobStatusAccessor = new JobStatusAccessor
+  val executeModule = new ExecuteModule
+  val jobStatusAccessor = new JobStatusAccessor
 
-    val ONE_SECOND : Int = 1000
+  val ONE_SECOND : Int = 1000
 
-    val availableJob = jobStatusAccessor.findReadyJob
+  val availableJob = jobStatusAccessor.findReadyJob
 
-    forever(
-      if (availableJob.isDefined) {
-        executeModule.run(availableJob.get)
-      } else {
-        Thread.sleep(10 * ONE_SECOND)
-      }
-    )
-  }
+  forever(
+    if (availableJob.isDefined) {
+      executeModule.run(availableJob.get)
+    } else {
+      Thread.sleep(10 * ONE_SECOND)
+    }
+  )
 
   def forever[A](body: => A): Nothing = {
     body
-
+    println("yayay")
     forever(body)
   }
 }
