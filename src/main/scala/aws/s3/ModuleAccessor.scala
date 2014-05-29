@@ -14,6 +14,7 @@ class ModuleAccessor extends S3Accessor with UsesPrefix {
   val bucket = s3.bucket(build(const.BUCKET_NAME)).get
 
   def getModuleExecutable(module: Module): Option[File] = {
+    println("Trying to get: " + module.key)
     val s3Obj: Option[S3Object] = bucket.get(module.key)
 
     if (s3Obj.isDefined) {
@@ -23,6 +24,7 @@ class ModuleAccessor extends S3Accessor with UsesPrefix {
 
       return Option.apply(file)
     } else {
+      println("couldn't get it in S3")
       return Option.empty
     }
   }

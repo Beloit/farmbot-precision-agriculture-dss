@@ -32,6 +32,8 @@ class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
   }
 
   def populateModuleConfiguration(module: Module) = {
+    println("isDefined: " + table.get(module.key).isDefined.toString)
+
     table.get(module.key).get.attributes.collectFirst({case i: Item =>
       module.timeout = i.attributes.find(_.name.contentEquals(const.TIMEOUT)).get.value.n.get.toInt
       module.persistent = i.attributes.find(_.name.contentEquals(const.PERSISTENT)).get.value.s.get equalsIgnoreCase("yes")})

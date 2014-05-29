@@ -51,14 +51,17 @@ class ExecuteModule {
         ProcessHandler.startInstanceProcess(job, executableFile.get, inStream, job.module.timeout, moduleFinished)
 
         IOUtils.closeQuietly(inStream)
-      }
 
-      throw new RuntimeException("The module executable could not be found, module: " + job.module.toString)
+      } else {
+        throw new RuntimeException("The module executable could not be found, module: " + job.module.toString)
+      }
     }
 
   }
 
   def moduleFinished(job: JobInfo, stdout: File, stderr: File, exitCode: Int): Unit = {
+    println("the module finished runnign!")
+
     if (exitCode == const.SUCCESS_CODE) {
       if (runDataAccessor.isValid(stdout, job)) {
         runDataAccessor.writeRunData(job, "out", stdout)

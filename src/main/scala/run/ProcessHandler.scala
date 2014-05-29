@@ -27,6 +27,8 @@ object ProcessHandler {
       }
     })
 
+    stopThread.start()
+
     instanceProcesses.put(executable.getName, (pc, stopThread))
 
     pc.start

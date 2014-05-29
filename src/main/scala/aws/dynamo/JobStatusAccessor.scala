@@ -33,9 +33,13 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
       const.STATUS -> JobStatus.Pending.toString,
       const.ADDED_AT -> info.addedAt.toString(ISODateTimeFormat.dateTime()),
       const.LAST_STATUS_CHANGE -> info.lastStatusChange.toString(ISODateTimeFormat.dateTime()),
-      const.NEXT_ID -> info.nextId,
-      const.PREVIOUS_ID -> info.previousId
+      const.NEXT_ID -> info.nextId.getOrElse(null),
+      const.PREVIOUS_ID -> info.previousId.getOrElse(null)
     )
+
+    println("Put a job!")
+    println("next: " + info.nextId.getOrElse("none"))
+    println("prev: " + info.previousId.getOrElse("none"))
 
     return info.jobId
   }
@@ -46,6 +50,11 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
 
   def updateStatus(farmChannelId: String, jobId: String, newStatus: JobStatus, expectedStatus: JobStatus) {
     val timestamp = DateTime.now().toString(ISODateTimeFormat.dateTime())
+
+    println("newStatus: " + newStatus.toString)
+    println("expectedStatus: " + expectedStatus.toString)
+    println("farmChannelId: " + farmChannelId)
+    println("jobId: " + jobId)
 
     val updateRequest = new UpdateItemRequest()
       .withTableName(table.name)
@@ -78,6 +87,7 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
       val job: JobInfo = new JobInfo
 
       job.farmId = jobInfoMap.get(const.FARM_ID).getS
+      job.farmChannelId = jobInfoMap.get(const.FARM_CHANNEL_ID).getS
       job.resourceId = jobInfoMap.get(const.RESOURCE_ID).getS
       job.channel = jobInfoMap.get(const.CHANNEL).getS
       job.channelVersion = jobInfoMap.get(const.CHANNEL_VERSION).getN.toInt

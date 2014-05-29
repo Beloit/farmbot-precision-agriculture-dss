@@ -17,8 +17,8 @@ class FarmChannelAccessorTest extends FlatSpec with RequiresAWS with UsesPrefix 
   val accessor = new FarmChannelAccessor
 
   "multipe farms" can "exist under one farm_channel" in {
-    accessor.addEntry("testChannel", 1, "farm1")
-    accessor.addEntry("testChannel", 1, "farm2")
+    //accessor.addEntry("testChannel", 1, "farm1")
+    //accessor.addEntry("testChannel", 1, "farm2")
 
     val ids = accessor.getFarmIdsForChannelVersion("testChannel", 1)
 

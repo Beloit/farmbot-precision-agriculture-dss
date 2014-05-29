@@ -64,6 +64,7 @@ class RunDataAccessor extends S3Accessor with UsesPrefix {
     val channelInfo : ChannelInfo = channelInfoAccessor.readChannelData(job.channel, job.channelVersion)
        
     val schema : JsonNode = JsonLoader.fromString(channelInfo.schema)
+
     val output : JsonNode = JsonLoader.fromFile(outputFile)
        
     val factory : JsonSchemaFactory = JsonSchemaFactory.byDefault()

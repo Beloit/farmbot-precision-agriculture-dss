@@ -13,15 +13,17 @@ object SlaveMain extends App {
 
   val ONE_SECOND : Int = 1000
 
-  val availableJob = jobStatusAccessor.findReadyJob
 
-  forever(
+  forever({
+    val availableJob = jobStatusAccessor.findReadyJob
+
     if (availableJob.isDefined) {
+      println("gonna run: " + availableJob.get.jobId)
       executeModule.run(availableJob.get)
     } else {
       Thread.sleep(10 * ONE_SECOND)
     }
-  )
+  })
 
   def forever[A](body: => A): Nothing = {
     body

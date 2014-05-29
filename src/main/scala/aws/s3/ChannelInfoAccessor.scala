@@ -106,7 +106,7 @@ class ChannelInfoAccessor extends S3Accessor with UsesPrefix {
       if (i != -1)
          s3String += i.asInstanceOf[Char]
     }
-    
+
     val option : Option[ChannelInfo] = Parse.decodeOption[ChannelInfo](s3String)
     
     return option.get

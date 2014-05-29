@@ -36,14 +36,17 @@ class ProcessContainer(val job: JobInfo, val executable: File, val input: InputS
     Process.apply("chmod 777 " + executable.getAbsolutePath).run.exitValue
 
     runningProcess = Option.apply(Process.apply(executable.getAbsolutePath, args).run(io))
+    println("started!")
     new Thread(new Runnable {
       def run = {
+        println("from inside the thread?")
         finish(runningProcess.get.exitValue)
       }
-    })
+    }).start
   }
 
   def stop = {
+    println("stop!")
     if (runningProcess.isDefined) {
       runningProcess.get.destroy
       runningProcess = Option.empty[Process]
@@ -53,6 +56,7 @@ class ProcessContainer(val job: JobInfo, val executable: File, val input: InputS
   }
 
   def finish(exitCode: Int) = {
+    println("finish!")
     outFileStream.flush
     IOUtils.closeQuietly(outFileStream)
 

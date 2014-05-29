@@ -10,12 +10,13 @@ class FarmChannel {
   def key: String = channel + "_" + version
 
   def id : String = {
-    var id: String = channel
+    "aFarmChannelID"
+    /*var id: String = channel
     id += farmID
     id += version.toString
     id += scheduleHour
     id += scheduleMinute
 
-    id.hashCode.toHexString
+    id.hashCode.toHexString   */
   }
 }
