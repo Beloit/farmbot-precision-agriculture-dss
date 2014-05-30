@@ -13,6 +13,8 @@ import scala.collection.mutable.ArrayBuffer
 class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
   implicit val const = FarmChannelConstants
 
+  ensureChannelFarmTableExists
+
   val table: Table = dynamo.table(build(const.TABLE_NAME)).get
 
   def addEntry(farmChannel: FarmChannel) {
@@ -76,4 +78,24 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
     return readyChannels
   }
 
+  private def ensureChannelFarmTableExists = {
+    implicit val const = FarmChannelConstants
+
+    val tableName: String = build(const.TABLE_NAME)
+    val table: Option[Table] = dynamo.table(tableName)
+
+    if (table.isEmpty) {
+      dynamo.createTable(
+        name = tableName,
+        hashPK = const.CHANNEL_AND_VERSION -> const.CHANNEL_AND_VERSION_TYPE,
+        rangePK = const.FARM_ID -> const.FARM_ID_TYPE,
+        otherAttributes = Seq(),
+        indexes = Seq()
+      )
+
+      Thread.sleep(10000)
+
+      dynamo.table(tableName).get.update(ProvisionedThroughput(1L, 1L))
+    }
+  }
 }

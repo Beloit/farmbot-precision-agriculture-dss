@@ -2,17 +2,13 @@ package mains
 
 import dynamo.JobStatusAccessor
 import run.ExecuteModule
-import aws.AWSInitialization
 import scala.Predef._
 
 object SlaveMain extends App {
-  AWSInitialization.setup
-
   val executeModule = new ExecuteModule
   val jobStatusAccessor = new JobStatusAccessor
 
   val ONE_SECOND : Int = 1000
-
 
   forever({
     val availableJob = jobStatusAccessor.findReadyJob

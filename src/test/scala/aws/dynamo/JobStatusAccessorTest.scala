@@ -1,6 +1,5 @@
 package dynamo
 
-import dynamo.JobStatusAccessor
 import org.scalatest.FlatSpec
 import awscala.{Region, CredentialsLoader}
 import helper.RequiresAWS

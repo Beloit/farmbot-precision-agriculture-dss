@@ -11,12 +11,9 @@ import types.JobInfo
 import constants.JobStatusTableConstants
 import constants.JobStatusTableConstants.JobStatus
 import constants.JobStatusTableConstants.JobStatus.JobStatus
-import aws.AWSInitialization
 import org.joda.time.DateTime
 
 object MasterMain extends App {
-  AWSInitialization.setup
-
   // scan farm channel table (based on schedules and current time)
   // should return farm channels that are currently ready
   val farmChannelAccessor : FarmChannelAccessor = new FarmChannelAccessor()

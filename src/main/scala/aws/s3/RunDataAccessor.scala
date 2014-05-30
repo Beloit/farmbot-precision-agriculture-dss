@@ -13,11 +13,15 @@ import com.github.fge.jsonschema.core.report.ProcessingReport
 import aws.UsesPrefix
 
 class RunDataAccessor extends S3Accessor with UsesPrefix {
+  val BUCKET_NAME = "farmbot-dss-rundata"
+
+  ensureBucketExists(build(BUCKET_NAME))
+
   val channelInfoAccessor = new ChannelInfoAccessor
 
   // runDataType can be "in", "out", or "err"
   def writeRunData(info : JobInfo, runDataType : String, file : File) {
-    val bucket: Option[Bucket] = s3.bucket(build("farmbot-dss-rundata"))
+    val bucket: Option[Bucket] = s3.bucket(build(BUCKET_NAME))
 
     val key: String = createKey(info.farmChannelId, info.jobId, runDataType)
 
@@ -25,7 +29,7 @@ class RunDataAccessor extends S3Accessor with UsesPrefix {
   }
    
   def writeRunData(info : JobInfo, runDataType : String, bytes : Array[Byte]) {
-    val bucket: Option[Bucket] = s3.bucket(build("farmbot-dss-rundata"))
+    val bucket: Option[Bucket] = s3.bucket(build(BUCKET_NAME))
 
     val key: String = createKey(info.farmChannelId, info.jobId, runDataType)
      
@@ -44,7 +48,7 @@ class RunDataAccessor extends S3Accessor with UsesPrefix {
   }
 
   def getRunData(farmChannelId : String, jobId : String, runDataType : String): File = {
-    val bucket: Option[Bucket] = s3.bucket(build("farmbot-dss-rundata"))
+    val bucket: Option[Bucket] = s3.bucket(build(BUCKET_NAME))
 
     val s3Obj = bucket.get.get(createKey(farmChannelId, jobId, runDataType))
 

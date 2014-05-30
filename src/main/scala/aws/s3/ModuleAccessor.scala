@@ -11,6 +11,8 @@ import aws.UsesPrefix
 class ModuleAccessor extends S3Accessor with UsesPrefix {
   implicit val const = ModuleConstants
 
+  ensureBucketExists(build(const.BUCKET_NAME))
+
   val bucket = s3.bucket(build(const.BUCKET_NAME)).get
 
   def getModuleExecutable(module: Module): Option[File] = {

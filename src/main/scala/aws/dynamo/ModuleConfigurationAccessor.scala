@@ -1,13 +1,15 @@
 package aws.dynamo
 
 import constants.ModuleConstants
-import awscala.dynamodbv2.{Item, Table}
+import awscala.dynamodbv2.{ProvisionedThroughput, Item, Table}
 import dynamo.DynamoAccessor
 import types.Module
 import aws.UsesPrefix
 
 class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
   implicit val const = ModuleConstants
+
+  ensureModuleConfigurationTableExists
 
   var table: Table = dynamo.table(build(const.TABLE_NAME)).get
 
@@ -37,5 +39,23 @@ class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
     table.get(module.key).get.attributes.collectFirst({case i: Item =>
       module.timeout = i.attributes.find(_.name.contentEquals(const.TIMEOUT)).get.value.n.get.toInt
       module.persistent = i.attributes.find(_.name.contentEquals(const.PERSISTENT)).get.value.s.get equalsIgnoreCase("yes")})
+  }
+
+  private def ensureModuleConfigurationTableExists = {
+    implicit val const = ModuleConstants
+
+    val tableName: String = build(const.TABLE_NAME)
+    val table: Option[Table] = dynamo.table(tableName)
+
+    if (table.isEmpty) {
+      dynamo.createTable(
+        name = tableName,
+        hashPK = const.MODULE_NAME_VERSION -> const.MODULE_NAME_VERSION_TYPE
+      )
+
+      Thread.sleep(10000)
+
+      dynamo.table(tableName).get.update(ProvisionedThroughput(1L, 1L))
+    }
   }
 }
