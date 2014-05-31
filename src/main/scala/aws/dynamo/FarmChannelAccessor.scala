@@ -21,7 +21,8 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
     table.putItem(farmChannel.key,
       const.FARM_ID -> farmChannel.farmID,
       const.SCHEDULE_HOUR -> farmChannel.scheduleHour,
-      const.SCHEDULE_MINUTE -> farmChannel.scheduleMinute)
+      const.SCHEDULE_MINUTE -> farmChannel.scheduleMinute,
+      const.RESOURCE_KEY -> farmChannel.opaqueIdentifier)
   }
 
   def getFarmIdsForChannelVersion(channel: String, version: Int): Seq[String] = {
@@ -69,6 +70,8 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
           channel.scheduleHour = value.getS
         } else if (name.equals(const.SCHEDULE_MINUTE)) {
           channel.scheduleMinute = value.getS
+        } else if (name.equals(const.RESOURCE_KEY)) {
+          channel.setOpaqueIdentifier(value.getS)
         }
       }
 
@@ -93,9 +96,7 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
         indexes = Seq()
       )
 
-      Thread.sleep(10000)
-
-      dynamo.table(tableName).get.update(ProvisionedThroughput(1L, 1L))
+      updateTableCapacity(tableName, 1, 1)
     }
   }
 }

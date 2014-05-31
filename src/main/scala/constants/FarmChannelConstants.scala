@@ -29,4 +29,7 @@ object FarmChannelConstants {
   
   val SCHEDULE_MINUTE: String = "ScheduleMinute"
   val SCHEDULE_MINUTE_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val RESOURCE_KEY: String = "ResourceKey"
+  val RESOURCE_KEY_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 }

@@ -39,10 +39,6 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
       const.PREVIOUS_ID -> info.previousId.getOrElse(null)
     )
 
-    println("Put a job!")
-    println("next: " + info.nextId.getOrElse("none"))
-    println("prev: " + info.previousId.getOrElse("none"))
-
     return info.jobId
   }
 
@@ -52,11 +48,6 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
 
   def updateStatus(farmChannelId: String, jobId: String, newStatus: JobStatus, expectedStatus: JobStatus) {
     val timestamp = DateTime.now().toString(ISODateTimeFormat.dateTime())
-
-    println("newStatus: " + newStatus.toString)
-    println("expectedStatus: " + expectedStatus.toString)
-    println("farmChannelId: " + farmChannelId)
-    println("jobId: " + jobId)
 
     val updateRequest = new UpdateItemRequest()
       .withTableName(table.name)

@@ -53,9 +53,7 @@ class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
         hashPK = const.MODULE_NAME_VERSION -> const.MODULE_NAME_VERSION_TYPE
       )
 
-      Thread.sleep(10000)
-
-      dynamo.table(tableName).get.update(ProvisionedThroughput(1L, 1L))
+      updateTableCapacity(tableName, 1, 1)
     }
   }
 }

@@ -46,7 +46,7 @@ object MasterMain extends App {
     // farmChannel.id => key into resource table (needs to be created and accessor written)
     // get ResourceTable for farmChannel.id will get all the resourceIds for that farm channel
     for (farmChannel <- farmChannels) {
-      var resources : Seq[String] = resourceTableAccessor.getResources(farmChannel.id)
+      var resources : Seq[String] = resourceTableAccessor.getResources(farmChannel)
       println("resources: " + resources.size.toString)
       // ChannelInfo => get ChannelInfo from accessor for the channel and version from the farm channel object
       // get list of modules for the channel from the ChannelInfo
@@ -85,7 +85,7 @@ object MasterMain extends App {
 
         previous = current
         current = new JobInfo {
-          farmChannelId = farmChannel.id
+          farmChannelId = farmChannel.opaqueIdentifier
           farmId = farmChannel.farmID
           resourceId = resourceID
           channel = channelInfo.name

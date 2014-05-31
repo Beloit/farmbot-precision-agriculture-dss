@@ -1,6 +1,6 @@
 package dynamo
 
-import awscala.dynamodbv2.DynamoDB
+import awscala.dynamodbv2.{ProvisionedThroughput, DynamoDB}
 import awscala.Region
 
 /**
@@ -13,4 +13,28 @@ import awscala.Region
  */
 trait DynamoAccessor {
   implicit val dynamo = DynamoDB.at(Region.Oregon)
+
+  def updateTableCapacity(tableName: String, readCap: Long, writeCap: Long) = {
+    untilTrue(tryUpdate(tableName, readCap, writeCap))
+  }
+
+  private def tryUpdate(tableName: String, readCap: Long, writeCap: Long): Boolean = {
+    Thread.sleep(1000)
+    try {
+      dynamo.table(tableName).get.update(ProvisionedThroughput(1L, 1L))
+    } catch {
+      case e: Exception => {
+        return false
+      }
+    }
+    return true
+  }
+
+  private def untilTrue[Boolean](body: => Boolean): Unit = {
+    val test: Boolean = body
+
+    if (test == false) {
+      untilTrue(body)
+    }
+  }
 }
