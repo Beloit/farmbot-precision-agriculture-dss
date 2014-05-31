@@ -1,20 +1,27 @@
 package dynamo
 
+import dynamo.JobStatusAccessor.JobStatus
+import dynamo.JobStatusAccessor.JobStatus.JobStatus
 import types.{Module, JobInfo}
 import awscala._
 import org.joda.time.format.ISODateTimeFormat
-import constants.JobStatusTableConstants
-import constants.JobStatusTableConstants.JobStatus
-import constants.JobStatusTableConstants.JobStatus.JobStatus
 import aws.UsesPrefix
 import com.amazonaws.services.dynamodbv2.model._
 import com.amazonaws.services.dynamodbv2.model.Condition
-import com.amazonaws.services.dynamodbv2.model.ExpectedAttributeValue
-import awscala.dynamodbv2.{ProvisionedThroughput, KeyType, KeySchema, Table}
+import awscala.dynamodbv2._
 import java.util
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator
+import com.amazonaws.services.dynamodbv2.model.ProjectionType
+import com.amazonaws.services.dynamodbv2.model.AttributeDefinition
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.amazonaws.services.dynamodbv2.model.Projection
+import awscala.dynamodbv2.Table
+import com.amazonaws.services.dynamodbv2.model.AttributeAction
+import awscala.dynamodbv2.KeyType
+import awscala.dynamodbv2.ProvisionedThroughput
 
 class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
-  implicit val const = JobStatusTableConstants
+  implicit val const = JobStatusAccessor
 
   ensureJobStatusTableExists
 
@@ -108,8 +115,6 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
   }
 
   private def ensureJobStatusTableExists = {
-    implicit val const = JobStatusTableConstants
-
     val tableName: String = build(const.TABLE_NAME)
     val table: Option[Table] = dynamo.table(tableName)
 
@@ -143,5 +148,60 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
 
       dynamo.createTable(createTableRequest)
     }
+  }
+}
+
+object JobStatusAccessor {
+  import awscala.dynamodbv2.AttributeType
+  import com.amazonaws.services.dynamodbv2
+
+  val TABLE_NAME: String = "JobStatus"
+
+  val HASH_KEY: String = FARM_CHANNEL_ID
+  val RANGE_KEY: String = JOB_ID
+
+  val JOB_ID: String = "JobId"
+  val JOB_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val FARM_CHANNEL_ID: String = "FarmChannelId"
+  val FARM_CHANNEL_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val ADDED_AT: String = "AddedAt"
+  val ADDED_AT_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val FARM_ID: String = "FarmID"
+  val FARM_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val RESOURCE_ID: String = "ResourceID"
+  val RESOURCE_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val CHANNEL: String = "Channel"
+  val CHANNEL_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val CHANNEL_VERSION: String = "ChannelVersion"
+  val CHANNEL_VERSION_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
+
+  val MODULE: String = "Module"
+  val MODULE_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val MODULE_VERSION: String = "ModuleVersion"
+  val MODULE_VERSION_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
+
+  val STATUS: String = "Status"
+  val STATUS_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val LAST_STATUS_CHANGE: String = "LastStatusChange"
+  val LAST_STATUS_CHANGE_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val NEXT_ID: String = "NextId"
+  val NEXT_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val PREVIOUS_ID: String = "PreviousId"
+  val PREVIOUS_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  object JobStatus extends Enumeration {
+    type JobStatus = Value
+
+    val Pending, Ready, Running, NoRetryError, Success, ErrorInvalidOutput, RetriesExceeded = Value
   }
 }

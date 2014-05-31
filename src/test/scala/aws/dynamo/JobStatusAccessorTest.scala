@@ -6,11 +6,10 @@ import helper.RequiresAWS
 import types.{Module, JobInfo}
 import awscala.dynamodbv2.{Table, DynamoDB}
 import aws.UsesPrefix
-import constants.JobStatusTableConstants
 
 class JobStatusAccessorTest extends FlatSpec with RequiresAWS with UsesPrefix {
   implicit val dynamo = DynamoDB.at(Region.Oregon)
-  implicit val const = JobStatusTableConstants
+  implicit val const = JobStatusAccessor
 
   val table: Table = dynamo.table(build(const.TABLE_NAME)).get
 

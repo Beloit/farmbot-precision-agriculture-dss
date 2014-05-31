@@ -5,12 +5,11 @@ import awscala.Region
 import helper.RequiresAWS
 import awscala.dynamodbv2.{Table, DynamoDB}
 import aws.UsesPrefix
-import constants.FarmChannelConstants
 import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ComparisonOperator, Condition}
 
 class FarmChannelAccessorTest extends FlatSpec with RequiresAWS with UsesPrefix {
   implicit val dynamo = DynamoDB.at(Region.Oregon)
-  implicit val const = FarmChannelConstants
+  implicit val const = FarmChannelAccessor
 
   var table: Table = dynamo.table(build(const.TABLE_NAME)).get
 

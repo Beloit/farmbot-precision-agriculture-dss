@@ -1,7 +1,6 @@
 package aws.s3
 
 import java.io.File
-import constants.ModuleConstants
 import s3.S3Accessor
 import awscala.s3.S3Object
 import java.nio.file.{StandardCopyOption, CopyOption, Files}
@@ -9,7 +8,7 @@ import types.Module
 import aws.UsesPrefix
 
 class ModuleAccessor extends S3Accessor with UsesPrefix {
-  implicit val const = ModuleConstants
+  implicit val const = ModuleAccessor
 
   ensureBucketExists(build(const.BUCKET_NAME))
 
@@ -34,4 +33,8 @@ class ModuleAccessor extends S3Accessor with UsesPrefix {
   def putModule(module: Module, moduleExecutable: File): String = {
     return bucket.put(module.key, moduleExecutable).eTag
   }
+}
+
+object ModuleAccessor {
+  val BUCKET_NAME: String = "modules"
 }

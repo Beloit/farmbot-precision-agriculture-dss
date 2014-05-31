@@ -1,13 +1,13 @@
 package aws.dynamo
 
-import constants.ModuleConstants
-import awscala.dynamodbv2.{ProvisionedThroughput, Item, Table}
+import awscala.dynamodbv2.{AttributeType, ProvisionedThroughput, Item, Table}
 import dynamo.DynamoAccessor
 import types.Module
 import aws.UsesPrefix
+import com.amazonaws.services.dynamodbv2
 
 class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
-  implicit val const = ModuleConstants
+  implicit val const = ModuleConfigurationAccessor
 
   ensureModuleConfigurationTableExists
 
@@ -42,8 +42,6 @@ class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
   }
 
   private def ensureModuleConfigurationTableExists = {
-    implicit val const = ModuleConstants
-
     val tableName: String = build(const.TABLE_NAME)
     val table: Option[Table] = dynamo.table(tableName)
 
@@ -56,4 +54,23 @@ class ModuleConfigurationAccessor extends DynamoAccessor with UsesPrefix  {
       updateTableCapacity(tableName, 1, 1)
     }
   }
+}
+
+object ModuleConfigurationAccessor {
+  val TABLE_NAME: String = "ModuleConfiguration"
+
+  val HASH_KEY: String = MODULE_NAME_VERSION
+
+  val MODULE_NAME_VERSION: String = "ModuleName"
+  val MODULE_NAME_VERSION_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val PERSISTENT: String = "Persistent"
+  val PERSISTENT_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val TIMEOUT: String = "Timeout"
+  val TIMEOUT_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
+
+  val SUCCESS_CODE : Int = 0
+  val RETRYABLE_ERROR_CODE : Int = 1
+  val TIMEOUT_CODE : Int = -1
 }

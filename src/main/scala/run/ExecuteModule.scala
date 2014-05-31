@@ -2,18 +2,17 @@ package run
 
 import dynamo.JobStatusAccessor
 import s3.{ChannelInfoAccessor, RunDataAccessor}
-import types.{Module, JobInfo}
-import constants.JobStatusTableConstants.JobStatus
+import types.JobInfo
+import dynamo.JobStatusAccessor.JobStatus
 import aws.dynamo.ModuleConfigurationAccessor
 import aws.s3.ModuleAccessor
 import java.io._
 import org.apache.commons.io.IOUtils
-import constants.ModuleConstants
 
 class ExecuteModule {
   val MAX_RETRIES: Int = 3
 
-  implicit val const = ModuleConstants
+  implicit val const = ModuleConfigurationAccessor
 
   val jobStatusAccessor: JobStatusAccessor = new JobStatusAccessor
   val moduleConfAccessor: ModuleConfigurationAccessor = new ModuleConfigurationAccessor

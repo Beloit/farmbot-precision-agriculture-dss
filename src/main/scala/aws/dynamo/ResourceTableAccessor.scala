@@ -1,14 +1,15 @@
 package dynamo
 
 import aws.UsesPrefix
-import constants.ResourceConstants
 import awscala._, dynamodbv2._
 import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ComparisonOperator, Condition}
 import types.FarmChannel
+import com.amazonaws.services.dynamodbv2
+import awscala.dynamodbv2
 
 
 class ResourceTableAccessor extends DynamoAccessor with UsesPrefix {
-  implicit val const = ResourceConstants
+  implicit val const = ResourceTableAccessor
 
   ensureResourceTableExists
 
@@ -23,8 +24,6 @@ class ResourceTableAccessor extends DynamoAccessor with UsesPrefix {
   }
 
   private def ensureResourceTableExists = {
-    implicit val const = ResourceConstants
-
     val tableName: String = build(const.TABLE_NAME)
     val table: Option[Table] = dynamo.table(tableName)
 
@@ -40,4 +39,16 @@ class ResourceTableAccessor extends DynamoAccessor with UsesPrefix {
       updateTableCapacity(tableName, 1, 1)
     }
   }
+}
+
+object ResourceTableAccessor {
+  import com.amazonaws.services.dynamodbv2
+
+  val TABLE_NAME: String = "FarmResources"
+
+  val FARM_CHANNEL_ID : String = "FarmChannelId"
+  val FARM_CHANNEL_ID_TYPE : dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val RESOURCE_ID : String = "ResourceId"
+  val RESOURCE_ID_TYPE : dynamodbv2.model.ScalarAttributeType = AttributeType.String
 }

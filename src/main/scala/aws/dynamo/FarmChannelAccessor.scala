@@ -1,7 +1,6 @@
 package dynamo
 
 import awscala._, dynamodbv2._
-import constants.FarmChannelConstants
 import aws.UsesPrefix
 import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ComparisonOperator, Condition}
 import scala.collection.mutable
@@ -9,9 +8,11 @@ import types.FarmChannel
 import java.util.Calendar
 import java.text.SimpleDateFormat
 import scala.collection.mutable.ArrayBuffer
+import com.amazonaws.services.dynamodbv2
+import awscala.dynamodbv2
 
 class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
-  implicit val const = FarmChannelConstants
+  implicit val const = FarmChannelAccessor
 
   ensureChannelFarmTableExists
 
@@ -82,7 +83,7 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
   }
 
   private def ensureChannelFarmTableExists = {
-    implicit val const = FarmChannelConstants
+    implicit val const = FarmChannelAccessor
 
     val tableName: String = build(const.TABLE_NAME)
     val table: Option[Table] = dynamo.table(tableName)
@@ -99,4 +100,28 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
       updateTableCapacity(tableName, 1, 1)
     }
   }
+}
+
+
+object FarmChannelAccessor {
+  import com.amazonaws.services.dynamodbv2
+
+  val TABLE_NAME: String = "ChannelFarm"
+
+  val HASH_KEY: String = CHANNEL_AND_VERSION
+
+  val CHANNEL_AND_VERSION: String = "ChannelAndVersion"
+  val CHANNEL_AND_VERSION_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val FARM_ID: String = "FarmID"
+  val FARM_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val SCHEDULE_HOUR: String = "ScheduleHour"
+  val SCHEDULE_HOUR_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val SCHEDULE_MINUTE: String = "ScheduleMinute"
+  val SCHEDULE_MINUTE_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+
+  val RESOURCE_KEY: String = "ResourceKey"
+  val RESOURCE_KEY_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 }

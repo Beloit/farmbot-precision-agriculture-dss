@@ -8,10 +8,8 @@ import s3.ChannelInfoAccessor
 import types.ChannelInfo
 import types.Module
 import types.JobInfo
-import constants.JobStatusTableConstants
-import constants.JobStatusTableConstants.JobStatus
-import constants.JobStatusTableConstants.JobStatus.JobStatus
 import org.joda.time.DateTime
+import dynamo.JobStatusAccessor.JobStatus
 
 object MasterMain extends App {
   // scan farm channel table (based on schedules and current time)
