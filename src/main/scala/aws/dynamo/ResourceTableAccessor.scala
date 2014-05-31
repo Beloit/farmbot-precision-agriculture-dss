@@ -22,6 +22,10 @@ class ResourceTableAccessor extends DynamoAccessor with UsesPrefix {
   
     return items.collect({case i: Item => i.attributes.find(_.name.contentEquals(const.RESOURCE_ID)).get.value.s.get})
   }
+  
+  def addEntry(farmChannelId : String, resourceId : String) {
+    table.putItem(farmChannelId, resourceId)
+  }
 
   private def ensureResourceTableExists = {
     val tableName: String = build(const.TABLE_NAME)
