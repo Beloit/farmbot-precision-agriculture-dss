@@ -13,24 +13,18 @@ import com.github.fge.jsonschema.core.report.ProcessingReport
 import aws.UsesPrefix
 
 class RunDataAccessor extends S3Accessor with UsesPrefix {
-  val BUCKET_NAME = "farmbot-dss-rundata"
-
-  ensureBucketExists(build(BUCKET_NAME))
+  implicit val const = RunDataAccessor
 
   val channelInfoAccessor = new ChannelInfoAccessor
 
   // runDataType can be "in", "out", or "err"
   def writeRunData(info : JobInfo, runDataType : String, file : File) {
-    val bucket: Option[Bucket] = s3.bucket(build(BUCKET_NAME))
-
     val key: String = createKey(info.farmChannelId, info.jobId, runDataType)
 
-    bucket.get.put(key, file)
+    const.bucket.put(key, file)
   }
    
   def writeRunData(info : JobInfo, runDataType : String, bytes : Array[Byte]) {
-    val bucket: Option[Bucket] = s3.bucket(build(BUCKET_NAME))
-
     val key: String = createKey(info.farmChannelId, info.jobId, runDataType)
      
     val fos : FileOutputStream = new FileOutputStream("testfile")
@@ -39,8 +33,8 @@ class RunDataAccessor extends S3Accessor with UsesPrefix {
     fos.close()
      
     val file : File = new File("testfile")
-     
-    bucket.get.put(key, file)
+
+    const.bucket.put(key, file)
   }
    
   private def createKey(farmChannelId : String, jobId : String, runDataType : String) : String = {
@@ -48,9 +42,7 @@ class RunDataAccessor extends S3Accessor with UsesPrefix {
   }
 
   def getRunData(farmChannelId : String, jobId : String, runDataType : String): File = {
-    val bucket: Option[Bucket] = s3.bucket(build(BUCKET_NAME))
-
-    val s3Obj = bucket.get.get(createKey(farmChannelId, jobId, runDataType))
+    val s3Obj = const.bucket.get(createKey(farmChannelId, jobId, runDataType))
 
     if (s3Obj.isDefined) {
       val file = File.createTempFile("runData", ".dat")
@@ -76,5 +68,16 @@ class RunDataAccessor extends S3Accessor with UsesPrefix {
        
     val report : ProcessingReport = channelSchema.validate(output)
     return report.isSuccess()
-  }}
+  }
+}
+
+object RunDataAccessor extends S3Accessor with UsesPrefix{
+  val BUCKET_NAME = "rundata"
+
+  def bucketName = build(BUCKET_NAME)
+
+  ensureBucketExists(bucketName)
+
+  def bucket = s3.bucket(bucketName).get
+}
 

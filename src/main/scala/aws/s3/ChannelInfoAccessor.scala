@@ -16,9 +16,7 @@ import aws.UsesPrefix
  * Accessor for farmbot channel info from s3. 
  */
 class ChannelInfoAccessor extends S3Accessor with UsesPrefix {
-  val BUCKET_NAME = "farmbot-dss-channels"
-
-  ensureBucketExists(build(BUCKET_NAME))
+  implicit val comp = ChannelInfoAccessor
   /*
    * Defines how to encode a Module object to json, all of these functions are
    * needed for the Argonaut json library
@@ -99,9 +97,9 @@ class ChannelInfoAccessor extends S3Accessor with UsesPrefix {
    */
   def readChannelData(name : String, version : Int): ChannelInfo = {
     val key : String = name + "/" + version
-    val bucket: Option[Bucket] = s3.bucket(build(BUCKET_NAME))
+    val bucket = comp.bucket
     
-    val s3Object = bucket.get.getObject(key)
+    val s3Object = bucket.getObject(key)
     var s3String : String = ""
     var i : Int = 1
     while (i != -1) {
@@ -114,4 +112,14 @@ class ChannelInfoAccessor extends S3Accessor with UsesPrefix {
     
     return option.get
   }
+}
+
+object ChannelInfoAccessor extends S3Accessor with UsesPrefix {
+  val BUCKET_NAME = "channels"
+
+  def bucketName = build(BUCKET_NAME)
+
+  ensureBucketExists(bucketName)
+
+  def bucket = s3.bucket(bucketName).get
 }

@@ -10,13 +10,9 @@ import aws.UsesPrefix
 class ModuleAccessor extends S3Accessor with UsesPrefix {
   implicit val const = ModuleAccessor
 
-  ensureBucketExists(build(const.BUCKET_NAME))
-
-  val bucket = s3.bucket(build(const.BUCKET_NAME)).get
-
   def getModuleExecutable(module: Module): Option[File] = {
     println("Trying to get: " + module.key)
-    val s3Obj: Option[S3Object] = bucket.get(module.key)
+    val s3Obj: Option[S3Object] = const.bucket.get(module.key)
 
     if (s3Obj.isDefined) {
       val file = File.createTempFile("module", module.key)
@@ -31,10 +27,16 @@ class ModuleAccessor extends S3Accessor with UsesPrefix {
   }
 
   def putModule(module: Module, moduleExecutable: File): String = {
-    return bucket.put(module.key, moduleExecutable).eTag
+    return const.bucket.put(module.key, moduleExecutable).eTag
   }
 }
 
-object ModuleAccessor {
+object ModuleAccessor extends S3Accessor with UsesPrefix{
   val BUCKET_NAME: String = "modules"
+
+  def bucketName = build(BUCKET_NAME)
+
+  ensureBucketExists(bucketName)
+
+  def bucket = s3.bucket(bucketName).get
 }
