@@ -96,7 +96,7 @@ class ChannelInfoAccessor extends S3Accessor with UsesPrefix {
    * the s3 key
    */
   def readChannelData(name : String, version : Int): ChannelInfo = {
-    val key : String = name + "/" + version
+    val key : String = name + "_" + version
     val bucket = comp.bucket
     
     val s3Object = bucket.getObject(key)

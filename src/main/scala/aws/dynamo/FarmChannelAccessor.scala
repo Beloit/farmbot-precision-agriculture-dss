@@ -23,7 +23,7 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
       const.FARM_ID -> farmChannel.farmID,
       const.SCHEDULE_HOUR -> farmChannel.scheduleHour,
       const.SCHEDULE_MINUTE -> farmChannel.scheduleMinute,
-      const.RESOURCE_KEY -> farmChannel.opaqueIdentifier)
+      const.OPAQUE_ID -> farmChannel.opaqueIdentifier)
   }
 
   def getFarmIdsForChannelVersion(channel: String, version: Int): Seq[String] = {
@@ -75,7 +75,7 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
           channel.scheduleHour = value.getS
         } else if (name.equals(const.SCHEDULE_MINUTE)) {
           channel.scheduleMinute = value.getS
-        } else if (name.equals(const.RESOURCE_KEY)) {
+        } else if (name.equals(const.OPAQUE_ID)) {
           channel.setOpaqueIdentifier(value.getS)
         }
       }
@@ -121,14 +121,14 @@ object FarmChannelAccessor {
   val FARM_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 
   val SCHEDULE_HOUR: String = "ScheduleHour"
-  val SCHEDULE_HOUR_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+  val SCHEDULE_HOUR_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
 
   val SCHEDULE_MINUTE: String = "ScheduleMinute"
-  val SCHEDULE_MINUTE_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+  val SCHEDULE_MINUTE_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
 
-  val RESOURCE_KEY: String = "ResourceKey"
-  val RESOURCE_KEY_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
-  
   val LAST_RUN_TIME: String = "LastRunTime"
   val LAST_RUN_TIME_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
+
+  val OPAQUE_ID: String = "OpaqueId"
+  val OPAQUE_ID_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
 }

@@ -18,7 +18,7 @@ class ResourceTableAccessor extends DynamoAccessor with UsesPrefix {
   def getResources(farmChannel : FarmChannel) : Seq[String] = {
     val cond = new Condition().withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(farmChannel.opaqueIdentifier))
     
-    val items = dynamo.query(table, Seq(const.FARM_CHANNEL_ID -> cond))
+    val items = dynamo.query(table, Seq(const.FARM_CHANNEL_OPAQUE_ID -> cond))
   
     return items.collect({case i: Item => i.attributes.find(_.name.contentEquals(const.RESOURCE_ID)).get.value.s.get})
   }
@@ -30,7 +30,7 @@ class ResourceTableAccessor extends DynamoAccessor with UsesPrefix {
     if (table.isEmpty) {
       dynamo.createTable(
         name = tableName,
-        hashPK = const.FARM_CHANNEL_ID -> const.FARM_CHANNEL_ID_TYPE,
+        hashPK = const.FARM_CHANNEL_OPAQUE_ID -> const.FARM_CHANNEL_OPAQUE_ID_TYPE,
         rangePK = const.RESOURCE_ID -> const.RESOURCE_ID_TYPE,
         otherAttributes = Seq(),
         indexes = Seq()
@@ -46,8 +46,8 @@ object ResourceTableAccessor {
 
   val TABLE_NAME: String = "FarmResources"
 
-  val FARM_CHANNEL_ID : String = "FarmChannelId"
-  val FARM_CHANNEL_ID_TYPE : dynamodbv2.model.ScalarAttributeType = AttributeType.String
+  val FARM_CHANNEL_OPAQUE_ID : String = "FarmChannelOpaqueId"
+  val FARM_CHANNEL_OPAQUE_ID_TYPE : dynamodbv2.model.ScalarAttributeType = AttributeType.String
 
   val RESOURCE_ID : String = "ResourceId"
   val RESOURCE_ID_TYPE : dynamodbv2.model.ScalarAttributeType = AttributeType.String
