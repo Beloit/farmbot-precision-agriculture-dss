@@ -43,14 +43,18 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
     val curTimeStr = hourMinuteFormat.format(today)
     val currentMinute = curTimeStr.split(":")(1)
     val currentHour = curTimeStr.split(":")(0)
+    val beginningOfHour = String.valueOf(System.currentTimeMillis() - (Integer.parseInt(currentMinute) * 60000))
+    val beginningOfDay = String.valueOf(System.currentTimeMillis() - (Integer.parseInt(currentHour) * 3600000))
     
     val hourEmptyCond = new Condition().withComparisonOperator(ComparisonOperator.NULL);
     val hourNotEmptyCond = new Condition().withComparisonOperator(ComparisonOperator.NOT_NULL);
     val pastMinuteCondition = new Condition().withComparisonOperator(ComparisonOperator.LE).withAttributeValueList(new AttributeValue().withS(currentMinute))
     val curHourCondition = new Condition().withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(currentHour))
+    val notRunYetHourlyCondition = new Condition().withComparisonOperator(ComparisonOperator.LT).withAttributeValueList(new AttributeValue().withN(beginningOfHour))
+    val notRunYetDailyCondition = new Condition().withComparisonOperator(ComparisonOperator.LT).withAttributeValueList(new AttributeValue().withN(beginningOfDay))
     
-    val hourlyItems = dynamo.scan(table, Seq(const.SCHEDULE_HOUR -> hourEmptyCond, const.SCHEDULE_MINUTE -> pastMinuteCondition))
-    val dailyItems = dynamo.scan(table, Seq(const.SCHEDULE_HOUR -> hourNotEmptyCond, const.SCHEDULE_HOUR -> curHourCondition, const.SCHEDULE_MINUTE -> pastMinuteCondition))
+    val hourlyItems = dynamo.scan(table, Seq(const.SCHEDULE_HOUR -> hourEmptyCond, const.SCHEDULE_MINUTE -> pastMinuteCondition, const.LAST_RUN_TIME -> notRunYetHourlyCondition))
+    val dailyItems = dynamo.scan(table, Seq(const.SCHEDULE_HOUR -> hourNotEmptyCond, const.SCHEDULE_HOUR -> curHourCondition, const.SCHEDULE_MINUTE -> pastMinuteCondition, const.LAST_RUN_TIME -> notRunYetDailyCondition))
 
     val items = hourlyItems ++ dailyItems
     var readyChannels  = ArrayBuffer[FarmChannel]();
@@ -124,4 +128,7 @@ object FarmChannelAccessor {
 
   val RESOURCE_KEY: String = "ResourceKey"
   val RESOURCE_KEY_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.String
+  
+  val LAST_RUN_TIME: String = "LastRunTime"
+  val LAST_RUN_TIME_TYPE: dynamodbv2.model.ScalarAttributeType = AttributeType.Number
 }
