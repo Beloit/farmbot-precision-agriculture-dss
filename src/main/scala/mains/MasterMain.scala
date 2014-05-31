@@ -40,18 +40,18 @@ object MasterMain extends App {
   def createReadyJobs() {  
     startTime = System.currentTimeMillis()
 
-    var farmChannels : Seq[FarmChannel] = farmChannelAccessor.getReadyJobs()
+    val farmChannels : Seq[FarmChannel] = farmChannelAccessor.getReadyJobs()
 
     // for each ready farm channel:
     // farmChannel.id => key into resource table (needs to be created and accessor written)
     // get ResourceTable for farmChannel.id will get all the resourceIds for that farm channel
     for (farmChannel <- farmChannels) {
-      var resources : Seq[String] = resourceTableAccessor.getResources(farmChannel)
+      val resources : Seq[String] = resourceTableAccessor.getResources(farmChannel)
       println("resources: " + resources.size.toString)
       // ChannelInfo => get ChannelInfo from accessor for the channel and version from the farm channel object
       // get list of modules for the channel from the ChannelInfo
-      var channelInfo : ChannelInfo = channelInfoAccessor.readChannelData(farmChannel.channel, farmChannel.version)
-      var modules : List[Module] = channelInfo.modules 
+      val channelInfo : ChannelInfo = channelInfoAccessor.readChannelData(farmChannel.channel, farmChannel.version)
+      val modules : List[Module] = channelInfo.modules
 
       // for each resourceId and module, create linked list of JobInfo's (set first job to ready, rest to pending)
       // put each job into job status table (in reverse order to avoid race condition)
