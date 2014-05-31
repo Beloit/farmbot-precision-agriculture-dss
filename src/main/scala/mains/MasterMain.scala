@@ -57,6 +57,9 @@ object MasterMain extends App {
       println("About to call addJobsForChannel")
 
       addJobsForChannel(resources, modules, farmChannel, channelInfo)
+      
+      farmChannel.lastRunTime = System.currentTimeMillis
+      farmChannelAccessor.addEntry(farmChannel)
     } 
     
     timeDiff = System.currentTimeMillis() - startTime
