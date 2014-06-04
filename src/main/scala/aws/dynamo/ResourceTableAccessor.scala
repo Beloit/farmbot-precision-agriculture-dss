@@ -15,8 +15,8 @@ class ResourceTableAccessor extends DynamoAccessor with UsesPrefix {
 
   var table: Table = dynamo.table(build(const.TABLE_NAME)).get
   
-  def getResources(farmChannel : FarmChannel) : Seq[String] = {
-    val cond = new Condition().withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(farmChannel.opaqueIdentifier))
+  def getResources(opaqueId : String) : Seq[String] = {
+    val cond = new Condition().withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(opaqueId))
     
     val items = dynamo.query(table, Seq(const.FARM_CHANNEL_OPAQUE_ID -> cond))
   

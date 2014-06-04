@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat
 import scala.collection.mutable.ArrayBuffer
 import com.amazonaws.services.dynamodbv2
 import awscala.dynamodbv2
+import scala.collection.immutable.Range
 
 class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
   implicit val const = FarmChannelAccessor
@@ -21,8 +22,9 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
   def addEntry(farmChannel: FarmChannel) {
     table.putItem(farmChannel.key,
       const.FARM_ID -> farmChannel.farmID,
-      const.SCHEDULE_HOUR -> farmChannel.scheduleHour,
-      const.SCHEDULE_MINUTE -> farmChannel.scheduleMinute,
+      const.SCHEDULE_HOUR -> farmChannel.scheduleHour.getOrElse(null),
+      const.SCHEDULE_MINUTE -> farmChannel.scheduleMinute.getOrElse(null),
+      const.LAST_RUN_TIME -> farmChannel.lastRunTime,
       const.OPAQUE_ID -> farmChannel.opaqueIdentifier)
   }
 
@@ -48,8 +50,8 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
     
     val hourEmptyCond = new Condition().withComparisonOperator(ComparisonOperator.NULL);
     val hourNotEmptyCond = new Condition().withComparisonOperator(ComparisonOperator.NOT_NULL);
-    val pastMinuteCondition = new Condition().withComparisonOperator(ComparisonOperator.LE).withAttributeValueList(new AttributeValue().withS(currentMinute))
-    val curHourCondition = new Condition().withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(currentHour))
+    val pastMinuteCondition = new Condition().withComparisonOperator(ComparisonOperator.LE).withAttributeValueList(new AttributeValue().withN(currentMinute))
+    val curHourCondition = new Condition().withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withN(currentHour))
     val notRunYetHourlyCondition = new Condition().withComparisonOperator(ComparisonOperator.LT).withAttributeValueList(new AttributeValue().withN(beginningOfHour))
     val notRunYetDailyCondition = new Condition().withComparisonOperator(ComparisonOperator.LT).withAttributeValueList(new AttributeValue().withN(beginningOfDay))
     
@@ -58,7 +60,9 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
 
     val items = hourlyItems ++ dailyItems
     var readyChannels  = ArrayBuffer[FarmChannel]();
-    
+
+    println("readyJobs: " + items.size.toString)
+
     for (item <- items) {
       val channel : FarmChannel = new FarmChannel();
       
@@ -72,9 +76,9 @@ class FarmChannelAccessor extends DynamoAccessor with UsesPrefix {
         } else if (name.equals(const.FARM_ID)) {
            channel.farmID = value.getS
         } else if (name.equals(const.SCHEDULE_HOUR)) {
-          channel.scheduleHour = value.getS
+          channel.scheduleHour = Option.apply(value.getN.toInt)
         } else if (name.equals(const.SCHEDULE_MINUTE)) {
-          channel.scheduleMinute = value.getS
+          channel.scheduleMinute = Option.apply(value.getN.toInt)
         } else if (name.equals(const.OPAQUE_ID)) {
           channel.setOpaqueIdentifier(value.getS)
         }

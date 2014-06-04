@@ -39,15 +39,14 @@ class FarmChannelAccessorTest extends FlatSpec with RequiresAWS with UsesPrefix 
     val today = Calendar.getInstance().getTime()
     val minuteFormat = new SimpleDateFormat("mm")
     val hourFormat = new SimpleDateFormat("h")
-    val currentMinuteAsString = minuteFormat.format(today)
-    val currentHourAsString = hourFormat.format(today)
-    val currentMinute = Integer.parseInt(currentMinuteAsString)
-    
+    val currentMinute = minuteFormat.format(today).toInt
+    val currentHour = hourFormat.format(today).toInt
+
     var a : Int = 0
     for (a <- 1 to 5) {
       farmChannel.channel = "channel" + a
-      farmChannel.scheduleHour = currentHourAsString
-      farmChannel.scheduleMinute = String.valueOf(currentMinute - 5)
+      farmChannel.scheduleHour = Option.apply(currentHour)
+      farmChannel.scheduleMinute = Option.apply(currentMinute - 5)
       
       accessor.addEntry(farmChannel);
     }
@@ -56,8 +55,8 @@ class FarmChannelAccessorTest extends FlatSpec with RequiresAWS with UsesPrefix 
     
     for (a <- 6 to 10) {
       farmChannel.channel = "channel" + a
-      farmChannel.scheduleHour = currentHourAsString
-      farmChannel.scheduleMinute = String.valueOf(currentMinute + 5)
+      farmChannel.scheduleHour = Option.apply(currentHour)
+      farmChannel.scheduleMinute = Option.apply(currentMinute + 5)
       
       accessor.addEntry(farmChannel)
     }

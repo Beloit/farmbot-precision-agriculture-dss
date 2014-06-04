@@ -32,7 +32,6 @@ class JobInfo {
     id += farmId
     id += resourceId
     id += channel
-    id += module
     id += addedAt.toString()
 
     return id.hashCode.toHexString
@@ -55,7 +54,7 @@ class JobInfo {
   }
 
   override def toString : String = {
-    String.format("farmID: %s, resourceID: %s, channel: %s, version: %d, module: %s, attempt: %d",
+    String.format("farmID: %s, resourceID: %s, channel: %s, version: %s, module: %s, attempt: %s",
       farmId, resourceId, channel, channelVersion.toString, module.toString, attempt.toString)
   }
 }

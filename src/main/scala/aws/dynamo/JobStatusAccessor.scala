@@ -28,9 +28,6 @@ class JobStatusAccessor extends DynamoAccessor with UsesPrefix {
   var table: Table = dynamo.table(build(const.TABLE_NAME)).get
 
   def addEntry(info: JobInfo): String = {
-    info.addedAt = DateTime.now
-    info.lastStatusChange = info.addedAt
-
     table.putItem(info.farmChannelId,
       info.jobId,
       const.FARM_ID -> info.farmId,

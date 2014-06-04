@@ -44,7 +44,7 @@ object MasterMain extends App {
     // farmChannel.id => key into resource table (needs to be created and accessor written)
     // get ResourceTable for farmChannel.id will get all the resourceIds for that farm channel
     for (farmChannel <- farmChannels) {
-      val resources : Seq[String] = resourceTableAccessor.getResources(farmChannel)
+      val resources : Seq[String] = resourceTableAccessor.getResources(farmChannel.opaqueIdentifier)
       println("resources: " + resources.size.toString)
       // ChannelInfo => get ChannelInfo from accessor for the channel and version from the farm channel object
       // get list of modules for the channel from the ChannelInfo
@@ -82,8 +82,6 @@ object MasterMain extends App {
 
       // create linked list of jobs for current resource
       for (curModule : Module <- modules) {
-        println("doing stuff for a module: " + curModule.toString)
-
         previous = current
         current = new JobInfo {
           farmChannelId = farmChannel.opaqueIdentifier
@@ -96,14 +94,20 @@ object MasterMain extends App {
           addedAt = DateTime.now()
           lastStatusChange = DateTime.now()
         }
+
+        println("Iteration: " + i.toString + " jobId: " + current.jobId)
+        println("jobToString: " + current.toString)
          
         if (previous != null) {
           current.previousId = Option.apply(previous.jobId)
+          println("Setting current.previous: " + previous.jobId)
         } else {
           current.previousId = Option.empty
         }
 
         if (previous != null) {
+          println("Setting previous.next: " + current.jobId)
+
           previous.nextId = Option.apply(current.jobId)
 
           // add previous entry to job table (initialized as pending)

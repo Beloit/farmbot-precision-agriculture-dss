@@ -4,8 +4,8 @@ class FarmChannel {
   var channel: String = _
   var version: Int = _
   var farmID: String = _
-  var scheduleHour: String = _
-  var scheduleMinute: String = _
+  var scheduleHour: Option[Int] = Option.empty
+  var scheduleMinute: Option[Int] = Option.empty
   var lastRunTime: Long = _
 
   private var opaqueIdentifierOption: Option[String] = Option.empty
@@ -27,7 +27,7 @@ class FarmChannel {
   /*
   Used to generate a key to be used as the primary key in the resource table accessor
    */
-  def generateOpaqueIdentifier : String = {
+  private def generateOpaqueIdentifier : String = {
     var id: String = channel
     id += farmID
     id += version.toString
